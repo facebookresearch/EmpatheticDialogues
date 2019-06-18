@@ -12,7 +12,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from ed.retrieval.datasets.tokens import PAD_TOKEN
+from ed.datasets.tokens import PAD_TOKEN
 
 
 def create_position_codes(n_pos, dim, out):

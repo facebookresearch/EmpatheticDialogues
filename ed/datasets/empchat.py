@@ -11,8 +11,8 @@ import re
 import torch
 from torch.utils.data import Dataset
 
-from ed.retrieval.datasets.simpler_dictionary import SimplerDictionary
-from ed.retrieval.datasets.tokens import get_bert_token_mapping
+from ed.datasets.simpler_dictionary import SimplerDictionary
+from ed.datasets.tokens import get_bert_token_mapping
 
 
 def get_emo(emotion):

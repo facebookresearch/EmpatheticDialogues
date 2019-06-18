@@ -13,7 +13,7 @@ import random
 import torch
 from torch.utils.data import Dataset
 
-from ed.retrieval.datasets.tokens import BERT_ID, PAD_TOKEN, START_OF_COMMENT, UNK_TOKEN
+from ed.datasets.tokens import BERT_ID, PAD_TOKEN, START_OF_COMMENT, UNK_TOKEN
 
 
 def keep_top_k(vec, k):

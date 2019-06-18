@@ -13,16 +13,16 @@ import torch.nn.functional as F
 import torch.optim as optim
 from torch.autograd import Variable
 
-from ed.retrieval.datasets.loader import TrainEnvironment
-from ed.retrieval.datasets.tokens import PAD_TOKEN
-from ed.retrieval.models import (
+from ed.datasets.loader import TrainEnvironment
+from ed.datasets.tokens import PAD_TOKEN
+from ed.models import (
     create as create_model,
     load as load_model,
     load_embeddings,
     save as save_model,
     score_candidates,
 )
-from ed.retrieval.util import get_logger, get_opt
+from ed.util import get_logger, get_opt
 
 
 def make_idf_tensor(wordcount, dic):

@@ -13,13 +13,13 @@ import torch
 from fairseq import bleu
 from tqdm import tqdm
 
-from ed.retrieval.datasets.dailydialog import DDDataset
-from ed.retrieval.datasets.empchat import EmpDataset
-from ed.retrieval.datasets.reddit import RedditDataset
-from ed.retrieval.datasets.simpler_dictionary import SimplerDictionary
-from ed.retrieval.datasets.tokens import PAD_TOKEN, START_OF_COMMENT, UNK_TOKEN
-from ed.retrieval.models import load as load_model, score_candidates
-from ed.retrieval.util import get_opt
+from ed.datasets.dailydialog import DDDataset
+from ed.datasets.empchat import EmpDataset
+from ed.datasets.reddit import RedditDataset
+from ed.datasets.simpler_dictionary import SimplerDictionary
+from ed.datasets.tokens import PAD_TOKEN, START_OF_COMMENT, UNK_TOKEN
+from ed.models import load as load_model, score_candidates
+from ed.util import get_opt
 
 
 logger = logging.getLogger()
