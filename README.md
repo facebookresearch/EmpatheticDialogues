@@ -20,7 +20,11 @@ Versions given are what the code has been tested on.
 
 ## Dataset
 
-[ADD INSTRUCTIONS FOR DOWNLOADING DATASET]
+To download the EmpatheticDialogues dataset:
+
+```
+wget https://dl.fbaipublicfiles.com/parlai/empatheticdialogues/empatheticdialogues.tar.gz
+```
 
 ## Commands
 
