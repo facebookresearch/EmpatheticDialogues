@@ -451,28 +451,13 @@ def get_bleu4(split, history_len=1):
     print(scorer.result_string(order=4))
     print(actual_ct)
     print(
-        "EMP "
-        + str(int(source_ct[1]))
-        + ": selected"
-        + str(float(source_ct[1]) / sum(source_ct))
-        + "%, but total:"
-        + str(float(actual_ct[1]) / sum(actual_ct))
+        f"EmpatheticDialogues {int(source_ct[1]):d}: selected {float(source_ct[1]) / sum(source_ct)}%, but total: {float(actual_ct[1]) / sum(actual_ct)}"
     )
     print(
-        "DD "
-        + str(int(source_ct[2]))
-        + ": selected"
-        + str(float(source_ct[2]) / sum(source_ct))
-        + "%, but total:"
-        + str(float(actual_ct[2]) / sum(actual_ct))
+        f"DailyDialog {int(source_ct[2]):d}: selected {float(source_ct[2]) / sum(source_ct)}%, but total: {float(actual_ct[2]) / sum(actual_ct)}"
     )
     print(
-        "REDDIT "
-        + str(int(source_ct[0]))
-        + ": selected"
-        + str(float(source_ct[0]) / sum(source_ct))
-        + "%, but total:"
-        + str(float(actual_ct[0]) / sum(actual_ct))
+        f"Reddit {int(source_ct[0]):d}: selected {float(source_ct[0]) / sum(source_ct)}%, but total: {float(actual_ct[0]) / sum(actual_ct)}"
     )
 
 
