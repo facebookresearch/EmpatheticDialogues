@@ -440,18 +440,7 @@ def get_bleu4(split, history_len=1):
             # This is a hack, because the other datasets have no .getid() method
         if args.fasttext is not None:
             response = " ".join(response.split()[args.fasttext :])
-        outf.write(
-            str(cid)
-            + "\t"
-            + str(sid)
-            + "\t"
-            + context
-            + "\t"
-            + response
-            + "\t"
-            + source
-            + "\n"
-        )
+        outf.write("\t".join([str(cid), str(sid), context, response, source]) + "\n")
         hypo_tokens = torch.IntTensor(bleu_parlai_dict.txt2vec(response))
         # Use this tokenization even if a BERT tokenizer exists, to match the
         # BLEU calculation when not using BERT
