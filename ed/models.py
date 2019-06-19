@@ -64,7 +64,7 @@ def save(filename, net, dictionary, optimizer):
 
 
 def load(filename, new_opt):
-    logging.info("Loading model %s" % filename)
+    logging.info(f"Loading model {filename}")
     saved_params = torch.load(filename, map_location=lambda storage, loc: storage)
     word_dict = saved_params["word_dict"]
     state_dict = saved_params["state_dict"]

@@ -148,13 +148,13 @@ def validate(
         accuracies = {r: 100 * n_acc / n_examples for r, n_acc in n_correct.items()}
         avg_loss = sum_losses / (n_losses + 0.00001)
         avg_acc = 100 * correct / (examples + 0.000001)
+        valid_time = time.time() - eval_start
         logging.info(
-            "Valid (%s): Epoch = %d | avg loss = %.3f | batch P@1 = %.2f %% | "
-            % (shuffled_str, epoch, avg_loss, avg_acc)
-            + " | ".join(
+            f"Valid ({shuffled_str}): Epoch = {epoch:d} | avg loss = {avg_loss:.3f} | batch P@1 = {avg_acc:.2f} % | "
+            + f" | ".join(
                 f"P@{k},{nb_candidates} = {v:.2f}%" for k, v in accuracies.items()
             )
-            + " | valid time = %.2f (s)" % (time.time() - eval_start)
+            + f" | valid time = {valid_time:.2f} (s)"
         )
         return avg_loss
     return 10
