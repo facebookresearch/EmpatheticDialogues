@@ -11,7 +11,7 @@
 # Thanks to the fact that python is not typed whatsoever, this should work
 
 
-class SimplerDictionary:
+class ParlAIDictionary:
     def __init__(self, file_path=None):
         """
         Initializes the dictionary with the same type of file that ParlAI's
@@ -65,7 +65,7 @@ class SimplerDictionary:
     def txt2vec(self, text):
         return [
             self.tok2ind.get(token, self.tok2ind.get(self.unk_token, None))
-            for token in SimplerDictionary.tokenize(text)
+            for token in ParlAIDictionary.tokenize(text)
         ]
 
     def as_reddit_style_dict(self):
@@ -84,7 +84,7 @@ class SimplerDictionary:
 
     @staticmethod
     def create_from_reddit_style(reddit_style_dic):
-        res = SimplerDictionary()
+        res = ParlAIDictionary()
         for w in reddit_style_dic["words"].keys():
             res.tok2ind[w] = reddit_style_dic["words"][w]
         for i in range(len(reddit_style_dic["iwords"])):

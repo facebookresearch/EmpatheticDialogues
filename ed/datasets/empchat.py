@@ -11,7 +11,7 @@ import re
 import torch
 from torch.utils.data import Dataset
 
-from ed.datasets.simpler_dictionary import SimplerDictionary
+from ed.datasets.parlai_dictionary import ParlAIDictionary
 from ed.datasets.tokens import get_bert_token_mapping
 
 
@@ -65,10 +65,10 @@ def txt2vec(dic, text, fasttext_type=None):
         cleaned_text = pattern.sub(lambda m: mapping[re.escape(m.group(0))], text)
         tokenized_text = dic.bert_tokenizer.tokenize(cleaned_text)
         return dic.bert_tokenizer.convert_tokens_to_ids(tokenized_text)
-    elif type(dic) is SimplerDictionary:
+    elif type(dic) is ParlAIDictionary:
         return dic.txt2vec(text)
     else:
-        return [dic.index(token) for token in SimplerDictionary.tokenize(text)]
+        return [dic.index(token) for token in ParlAIDictionary.tokenize(text)]
 
 
 def sentence_to_tensor(dic, sentence, maxlen=None, fasttext_type=None):
@@ -78,7 +78,7 @@ def sentence_to_tensor(dic, sentence, maxlen=None, fasttext_type=None):
     indexes = txt2vec(dic, sentence, fasttext_type)
     if maxlen is not None and maxlen <= len(indexes):
         indexes = indexes[: maxlen - 1]
-    if type(dic) is SimplerDictionary:
+    if type(dic) is ParlAIDictionary:
         return torch.LongTensor(indexes)
     else:
         indexes.append(dic.eos())

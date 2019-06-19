@@ -16,7 +16,7 @@ from torch.utils.data import DataLoader
 from ed.datasets.empchat import EmpDataset
 from ed.datasets.dailydialog import DDDataset
 from ed.datasets.reddit import RedditDataset
-from ed.datasets.simpler_dictionary import SimplerDictionary
+from ed.datasets.parlai_dictionary import ParlAIDictionary
 from ed.datasets.tokens import (
     get_bert_token_mapping,
     BERT_ID,
@@ -100,7 +100,7 @@ class TrainEnvironment:
         self.dataset_name = opt.dataset_name
         if self.dataset_name in ["dailydialog", "empchat"]:
             if dictionary is not None:
-                self.temp_dict = SimplerDictionary.create_from_reddit_style(dictionary)
+                self.temp_dict = ParlAIDictionary.create_from_reddit_style(dictionary)
             else:
                 self.dict = build_dictionary(opt)
                 if EMPTYPERSONA_TOKEN not in self.dict["words"]:
@@ -108,7 +108,7 @@ class TrainEnvironment:
                     self.dict["words"] = {
                         w: i for i, w in enumerate(self.dict["iwords"])
                     }
-                self.temp_dict = SimplerDictionary.create_from_reddit_style(self.dict)
+                self.temp_dict = ParlAIDictionary.create_from_reddit_style(self.dict)
             self.dict = dictionary or self.temp_dict.as_reddit_style_dict()
         elif self.dataset_name == "reddit":
             self.dict = dictionary or build_dictionary(opt)

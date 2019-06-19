@@ -16,7 +16,7 @@ from tqdm import tqdm
 from ed.datasets.dailydialog import DDDataset
 from ed.datasets.empchat import EmpDataset
 from ed.datasets.reddit import RedditDataset
-from ed.datasets.simpler_dictionary import SimplerDictionary
+from ed.datasets.parlai_dictionary import ParlAIDictionary
 from ed.datasets.tokens import PAD_TOKEN, START_OF_COMMENT, UNK_TOKEN
 from ed.models import load as load_model, score_candidates
 from ed.util import get_opt
@@ -172,11 +172,11 @@ def build_candidates(
         else:
             return sentence_[0].item == gt_index
 
-    temp_dict = SimplerDictionary.create_from_reddit_style(net_dictionary)
+    parlai_dict = ParlAIDictionary.create_from_reddit_style(net_dictionary)
     if args.ec:
         dataset = EmpDataset(
             "train",
-            temp_dict,
+            parlai_dict,
             data_folder=args.empchat_folder,
             reactonly=False,
             fasttext=args.fasttext,
@@ -209,7 +209,7 @@ def build_candidates(
     actual_ct[1] = i
     if args.dd:
         dataset = DDDataset(
-            "train", temp_dict, data_folder=args.dailydialog_folder, reactonly=False
+            "train", parlai_dict, data_folder=args.dailydialog_folder, reactonly=False
         )
         sample_index = range(len(dataset))
         for data_idx in sample_index:
@@ -392,23 +392,23 @@ def get_bleu4(split, history_len=1):
     if history_len < 1:
         history_len = 1
     source_ct = [0, 0, 0]
-    net_temp_dict = SimplerDictionary.create_from_reddit_style(net_dictionary)
-    bleu_temp_dict = SimplerDictionary.create_from_reddit_style(bleu_dictionary)
+    net_parlai_dict = ParlAIDictionary.create_from_reddit_style(net_dictionary)
+    bleu_parlai_dict = ParlAIDictionary.create_from_reddit_style(bleu_dictionary)
     scorer = bleu.Scorer(BLEU_PAD_IDX, BLEU_EOS_IDX, BLEU_UNK_IDX)
     outf = open("retrieved_split_" + args.name + "_" + split + ".txt", "w")
 
-    def _get_dataset(reddit_dict, temp_dict):
+    def _get_dataset(reddit_dict, parlai_dict):
         if args.task == "dd":
             return DDDataset(
                 split,
-                temp_dict,
+                parlai_dict,
                 data_folder=args.dailydialog_folder,
                 history_len=history_len,
             )
         elif args.task == "ec":
             return EmpDataset(
                 split,
-                temp_dict,
+                parlai_dict,
                 data_folder=args.empchat_folder,
                 history_len=history_len,
                 reactonly=args.reactonly,
@@ -428,8 +428,8 @@ def get_bleu4(split, history_len=1):
         else:
             raise ValueError("Task unrecognized!")
 
-    net_dataset = _get_dataset(net_dictionary, net_temp_dict)
-    bleu_dataset = _get_dataset(bleu_dictionary, bleu_temp_dict)
+    net_dataset = _get_dataset(net_dictionary, net_parlai_dict)
+    bleu_dataset = _get_dataset(bleu_dictionary, bleu_parlai_dict)
     sample_index = range(len(bleu_dataset))
     for data_idx in sample_index:
         net_context, net_persona, _ = net_dataset[data_idx][:3]
@@ -437,7 +437,7 @@ def get_bleu4(split, history_len=1):
         target_tokens = bleu_sentence
         if args.fasttext is not None:
             target_tokens = target_tokens[args.fasttext :]
-        context = bleu_temp_dict.vec2txt(bleu_context.numpy().tolist())
+        context = bleu_parlai_dict.vec2txt(bleu_context.numpy().tolist())
         responses, sources = predict(None, net_context)
         response = responses[0][0]
         source = sources[0]
@@ -466,7 +466,7 @@ def get_bleu4(split, history_len=1):
             + source
             + "\n"
         )
-        hypo_tokens = torch.IntTensor(bleu_temp_dict.txt2vec(response))
+        hypo_tokens = torch.IntTensor(bleu_parlai_dict.txt2vec(response))
         # Use this tokenization even if a BERT tokenizer exists, to match the
         # BLEU calculation when not using BERT
         scorer.add(target_tokens.type(torch.IntTensor), hypo_tokens)
