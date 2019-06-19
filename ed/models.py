@@ -17,7 +17,7 @@ from ed.transformer_local import TransformerAdapter
 
 def load_embeddings(opt, dictionary, model):
     path = opt.embeddings
-    logging.info("Loading embeddings file from {}".format(path))
+    logging.info(f"Loading embeddings file from {path}")
     emb_table = model.embeddings.weight
     requires_grad = emb_table.requires_grad
     emb_table[dictionary[PAD_TOKEN]].zero_()  # Zero-out padding index
