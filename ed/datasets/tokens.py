@@ -6,6 +6,7 @@
 #
 
 from collections import OrderedDict
+from typing import Optional
 
 
 UNK_TOKEN = "<UNK>"
@@ -113,4 +114,21 @@ def get_bert_token_mapping(label_set=None):
             (END_OF_COMMENT, "[SEP]"),
         ]
         + label_set_pairs
+    )
+
+
+def tokenize(text, split_sep: Optional[str] = " "):
+    return (
+        text.replace(".", " . ")
+        .replace(". . .", "...")
+        .replace(",", " , ")
+        .replace(";", " ; ")
+        .replace(":", " : ")
+        .replace("!", " ! ")
+        .replace("'", " ' ")
+        .replace("?", " ? ")
+        .replace("  ", " ")
+        .replace("  ", " ")
+        .strip()
+        .split(split_sep)
     )

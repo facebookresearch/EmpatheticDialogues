@@ -12,7 +12,7 @@ import torch
 from torch.utils.data import Dataset
 
 from ed.datasets.parlai_dictionary import ParlAIDictionary
-from ed.datasets.tokens import get_bert_token_mapping
+from ed.datasets.tokens import get_bert_token_mapping, tokenize
 
 
 def get_emo(emotion):
@@ -68,7 +68,7 @@ def txt2vec(dic, text, fasttext_type=None):
     elif type(dic) is ParlAIDictionary:
         return dic.txt2vec(text)
     else:
-        return [dic.index(token) for token in ParlAIDictionary.tokenize(text)]
+        return [dic.index(token) for token in tokenize(text)]
 
 
 def sentence_to_tensor(dic, sentence, maxlen=None, fasttext_type=None):

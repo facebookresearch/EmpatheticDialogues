@@ -10,6 +10,8 @@
 # without the long chain of dependency.
 # Thanks to the fact that python is not typed whatsoever, this should work
 
+from ed.datasets.tokens import tokenize
+
 
 class ParlAIDictionary:
     def __init__(self, file_path=None):
@@ -44,28 +46,10 @@ class ParlAIDictionary:
             .replace(" ? ", "? ")
         )
 
-    @staticmethod
-    def tokenize(text):
-        res = (
-            text.replace(".", " . ")
-            .replace(". . .", "...")
-            .replace(",", " , ")
-            .replace(";", " ; ")
-            .replace(":", " : ")
-            .replace("!", " ! ")
-            .replace("'", " ' ")
-            .replace("?", " ? ")
-            .replace("  ", " ")
-            .replace("  ", " ")
-            .strip()
-            .split(" ")
-        )
-        return res
-
     def txt2vec(self, text):
         return [
             self.tok2ind.get(token, self.tok2ind.get(self.unk_token, None))
-            for token in ParlAIDictionary.tokenize(text)
+            for token in tokenize(text)
         ]
 
     def as_reddit_style_dict(self):

@@ -17,7 +17,7 @@ from ed.datasets.dailydialog import DDDataset
 from ed.datasets.empchat import EmpDataset
 from ed.datasets.reddit import RedditDataset
 from ed.datasets.parlai_dictionary import ParlAIDictionary
-from ed.datasets.tokens import PAD_TOKEN, START_OF_COMMENT, UNK_TOKEN
+from ed.datasets.tokens import tokenize, PAD_TOKEN, START_OF_COMMENT, UNK_TOKEN
 from ed.models import load as load_model, score_candidates
 from ed.util import get_opt
 
@@ -291,24 +291,10 @@ def embed_candidates(candidates):
     return out_tensor
 
 
-def tokenize(sentence):
+def get_token_tensor(sentence):
     words = net_dictionary["words"]
-    sentence = (
-        sentence.replace("?", " ? '")
-        .replace(":", " : ")
-        .replace(".", " . ")
-        .replace(". . .", "...")
-        .replace(",", " , ")
-        .replace(";", " ; ")
-        .replace(":", " : ")
-        .replace("!", " ! ")
-        .replace("'", " ' ")
-        .replace("?", " ? ")
-        .replace("  ", " ")
-        .replace("  ", " ")
-        .strip()
-    )
-    return torch.LongTensor([words.get(w, NET_UNK_IDX) for w in sentence.split()])
+    tokenized = tokenize(sentence, split_sep=None)
+    return torch.LongTensor([words.get(w, NET_UNK_IDX) for w in tokenized])
 
 
 def stringify(tensor):
@@ -363,7 +349,7 @@ def predict(persona, context, top_n=5, normalize=False):
     """
     with torch.no_grad():
         if persona is None:
-            persona = pad([tokenize(PAD_TOKEN)])
+            persona = pad([get_token_tensor(PAD_TOKEN)])
         persona = persona.unsqueeze(0)
         context = context.unsqueeze(0)
         candidates = fixed_candidates
