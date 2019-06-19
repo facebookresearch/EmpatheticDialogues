@@ -77,8 +77,7 @@ def train(epoch, start_time, model, optimizer, opt_, data_loader):
             acc = 100 * nb_ok / nb_exs
             elapsed = time.time() - start_time
             logging.info(
-                f"train: Epoch = {epoch} | iter = {idx}/{len(data_loader)} | "
-                + f"loss = {avg_loss:.3f} | batch P@1 = {acc:.2f} % | elapsed time = {elapsed:.2f} (s)"
+                f"train: Epoch = {epoch} | iter = {idx}/{len(data_loader)} | loss = {avg_loss:.3f} | batch P@1 = {acc:.2f} % | elapsed time = {elapsed:.2f} (s)"
             )
             train_loss = 0
             nb_losses = 0
