@@ -300,7 +300,8 @@ def load_personas(opt, dictionary, split_sentences=True):
             if opt.fast_debug and len(uid2personas) > 1000:
                 break
     logging.info(f"n personas: {len(uid2personas)}")
-    dumpfn = "../dumps/encoded-%s" % opt.personas.split("/")[-1]
+    persona_string = opt.personas.split("/")[-1]
+    dumpfn = f"../dumps/encoded-{persona_string}"
     logging.info(f"dumping encoded personas to {dumpfn}")
     torch.save(uid2personas, dumpfn)
     return uid2personas

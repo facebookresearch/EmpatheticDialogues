@@ -113,7 +113,9 @@ def get_logger(opt):
         logfile = logging.FileHandler(opt.log_file, "a")
         logfile.setFormatter(fmt)
         logger.addHandler(logfile)
-    logger.info("COMMAND: %s" % " ".join(sys.argv))
+    command = " ".join(sys.argv)
+    logger.info(f"COMMAND: {command}")
     logger.info("-" * 100)
-    logger.info("CONFIG:\n%s" % json.dumps(vars(opt), indent=4, sort_keys=True))
+    config = json.dumps(vars(opt), indent=4, sort_keys=True)
+    logger.info(f"CONFIG:\n{config}")
     return logger

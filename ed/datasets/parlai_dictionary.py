@@ -20,7 +20,7 @@ class ParlAIDictionary:
         self.tok2ind = {}
         self.ind2tok = {}
         self.freq = {}
-        print("Loading dictionary from %s" % file_path)
+        print(f"Loading dictionary from {file_path}")
         if file_path is not None:
             with open(file_path, "r") as f:
                 counter = 0
