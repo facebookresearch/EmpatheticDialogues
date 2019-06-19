@@ -84,7 +84,7 @@ def train(epoch, start_time, model, optimizer, opt_, data_loader):
             nb_losses = 0
     epoch_elapsed = time.time() - epoch_start
     logging.info(
-        "train: Epoch %d done. Time for epoch = %.2f (s)" % (epoch, epoch_elapsed)
+        f"train: Epoch {epoch:d} done. Time for epoch = {epoch_elapsed:.2f} (s)"
     )
 
 

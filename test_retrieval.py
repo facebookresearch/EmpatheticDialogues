@@ -84,7 +84,7 @@ args = parser.parse_args()
 args.cuda = not args.no_cuda and torch.cuda.is_available()
 if args.cuda:
     torch.cuda.set_device(args.gpu)
-    logger.info("CUDA enabled (GPU %d)" % args.gpu)
+    logger.info(f"CUDA enabled (GPU {args.gpu:d})")
 else:
     logger.info("Running on CPU only.")
 if args.fasttext is not None:
@@ -116,7 +116,7 @@ BLEU_EOS_IDX = bleu_dictionary["words"][START_OF_COMMENT]
 args.cuda = not args.no_cuda and torch.cuda.is_available()
 if args.cuda:
     torch.cuda.set_device(args.gpu)
-    logger.info("CUDA enabled (GPU %d)" % args.gpu)
+    logger.info(f"CUDA enabled (GPU {args.gpu:d})")
 else:
     logger.info("Running on CPU only.")
 actual_ct = [0, 0, 0]
