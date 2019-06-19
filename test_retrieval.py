@@ -29,11 +29,9 @@ console = logging.StreamHandler()
 console.setFormatter(fmt)
 logger.addHandler(console)
 
-
 # ------------------------------------------------------------------------------
 # Commandline arguments & init
 # ------------------------------------------------------------------------------
-
 
 parser = argparse.ArgumentParser()
 parser.add_argument(
@@ -83,14 +81,12 @@ parser.add_argument("--max-hist-len", type=int, default=1)
 parser.add_argument("--gpu", type=int, default=-1, help="Specify GPU device id to use")
 parser.add_argument("--task", type=str, default="ec")
 args = parser.parse_args()
-
 args.cuda = not args.no_cuda and torch.cuda.is_available()
 if args.cuda:
     torch.cuda.set_device(args.gpu)
     logger.info("CUDA enabled (GPU %d)" % args.gpu)
 else:
     logger.info("Running on CPU only.")
-
 if args.fasttext is not None:
     args.max_cand_length += args.fasttext
 net, net_dictionary = load_model(args.model, get_opt(empty=True))
@@ -103,7 +99,6 @@ if args.bleu_dict is not None:
     _, bleu_dictionary = load_model(args.bleu_dict, get_opt(empty=True))
 else:
     bleu_dictionary = net_dictionary
-
 paramnum = 0
 trainable = 0
 for parameter in net.parameters():
@@ -111,23 +106,19 @@ for parameter in net.parameters():
         trainable += parameter.numel()
     paramnum += parameter.numel()
 print(paramnum, trainable)
-
 print(type(net_dictionary))
 NET_PAD_IDX = net_dictionary["words"][PAD_TOKEN]
 NET_UNK_IDX = net_dictionary["words"][UNK_TOKEN]
-
 print(type(bleu_dictionary))
 BLEU_PAD_IDX = bleu_dictionary["words"][PAD_TOKEN]
 BLEU_UNK_IDX = bleu_dictionary["words"][UNK_TOKEN]
 BLEU_EOS_IDX = bleu_dictionary["words"][START_OF_COMMENT]
-
 args.cuda = not args.no_cuda and torch.cuda.is_available()
 if args.cuda:
     torch.cuda.set_device(args.gpu)
     logger.info("CUDA enabled (GPU %d)" % args.gpu)
 else:
     logger.info("Running on CPU only.")
-
 actual_ct = [0, 0, 0]
 if args.cuda:
     net = torch.nn.DataParallel(net)
@@ -151,7 +142,6 @@ def build_candidates(
     tensor = torch.LongTensor(n_cands, max_cand_length).fill_(NET_PAD_IDX)
     i = 0
     chunk = 422
-
     if "bert_tokenizer" in net_dictionary:
         gt_tokens = torch.LongTensor(
             net_dictionary["bert_tokenizer"].convert_tokens_to_ids(["&", "g", "##t"])
@@ -217,7 +207,6 @@ def build_candidates(
                     break
     breakpoint_ = i
     actual_ct[1] = i
-
     if args.dd:
         dataset = DDDataset(
             "train", temp_dict, data_folder=args.dailydialog_folder, reactonly=False
@@ -246,7 +235,6 @@ def build_candidates(
                     break
     bp2 = i
     actual_ct[2] = i - breakpoint_
-
     if args.reddit:
         while i < n_cands:
             chunk += 1
@@ -282,7 +270,6 @@ def build_candidates(
         f"Loaded {i} candidates, {n_start_gt} start with >, {n_duplicates} duplicates"
     )
     args.n_candidates = i
-
     return tensor[:i, :], breakpoint_, bp2
 
 
@@ -344,11 +331,8 @@ else:
     fixed_candidates, breakingpt, breakingpt2 = build_candidates(
         args.max_cand_length, args.n_candidates
     )
-
 if args.cuda:
     fixed_candidates = fixed_candidates.cuda(non_blocking=True)
-
-
 logging.warning("Embedding candidates")
 with torch.no_grad():
     cand_embs = embed_candidates(fixed_candidates)
@@ -367,7 +351,6 @@ if args.save_files:
             f.write(stringify(candidate))
             f.write("\n")
     logging.warning("Done saving files")
-
 
 # ------------------------------------------------------------------------------
 # Drop in to interactive mode
@@ -399,7 +382,6 @@ def predict(persona, context, top_n=5, normalize=False):
                 outputs.append("DailyDialogue")
             else:
                 outputs.append("Reddit")
-
         return response, outputs
 
 
@@ -407,14 +389,11 @@ def get_bleu4(split, history_len=1):
     """
     Allows to discuss with the bot a bit faster.
     """
-
     if history_len < 1:
         history_len = 1
     source_ct = [0, 0, 0]
-
     net_temp_dict = SimplerDictionary.create_from_reddit_style(net_dictionary)
     bleu_temp_dict = SimplerDictionary.create_from_reddit_style(bleu_dictionary)
-
     scorer = bleu.Scorer(BLEU_PAD_IDX, BLEU_EOS_IDX, BLEU_UNK_IDX)
     outf = open("retrieved_split_" + args.name + "_" + split + ".txt", "w")
 
@@ -491,7 +470,6 @@ def get_bleu4(split, history_len=1):
         # Use this tokenization even if a BERT tokenizer exists, to match the
         # BLEU calculation when not using BERT
         scorer.add(target_tokens.type(torch.IntTensor), hypo_tokens)
-
     print(scorer.result_string(order=1))
     print(scorer.result_string(order=2))
     print(scorer.result_string(order=3))

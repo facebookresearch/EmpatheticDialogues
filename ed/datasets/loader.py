@@ -10,15 +10,14 @@ import os
 import os.path
 
 import torch
+import tqdm
 from torch.utils.data import DataLoader
-from torch.autograd import Variable
-from tqdm import tqdm
 
-from ed.retrieval.datasets.empchat import EmpDataset
-from ed.retrieval.datasets.dailydialog import DDDataset
-from ed.retrieval.datasets.reddit import RedditDataset
-from ed.retrieval.datasets.simpler_dictionary import SimplerDictionary
-from ed.retrieval.datasets.tokens import (
+from ed.datasets.empchat import EmpDataset
+from ed.datasets.dailydialog import DDDataset
+from ed.datasets.reddit import RedditDataset
+from ed.datasets.simpler_dictionary import SimplerDictionary
+from ed.datasets.tokens import (
     get_bert_token_mapping,
     BERT_ID,
     EMPTYPERSONA_TOKEN,
@@ -31,7 +30,6 @@ from ed.retrieval.datasets.tokens import (
 
 
 def build_dictionary(opt):
-
     if opt.model == "bert":
         return build_bert_dictionary(opt)
     else:
@@ -49,7 +47,6 @@ def build_dictionary(opt):
 
 
 def build_bert_dictionary(opt):
-
     try:
         from pytorch_pretrained_bert import BertTokenizer
     except ImportError:
@@ -57,18 +54,15 @@ def build_bert_dictionary(opt):
             "BERT rankers needs pytorch-pretrained-BERT installed. "
             "\npip install pytorch-pretrained-bert"
         )
-
     if BERT_ID != "bert-base-cased" and opt.dataset_name == "reddit":
         raise NotImplementedError(
             "Currently, only bert-base-cased can be used with reddit!"
         )
-
     if BERT_ID != "bert-base-cased" and opt.fasttext_type is not None:
         raise NotImplementedError(
             'Currently, "bert-base-cased" is the only BERT model for which we '
             "have defined lists of fastText labels without BERT tokens!"
         )
-
     is_cased = BERT_ID.split("-")[2] == "cased"
     tokenizer = BertTokenizer.from_pretrained(
         BERT_ID,
@@ -78,7 +72,6 @@ def build_bert_dictionary(opt):
             + list(get_bert_token_mapping(opt.fasttext_type).values())
         ),
     )
-
     dict_ = dict()
 
     # Create dictionary from HuggingFace version. Note that the special tokens
@@ -94,11 +87,8 @@ def build_bert_dictionary(opt):
     dict_["iwords"] = list(tokenizer.vocab.keys())
     for orig_token, bert_token in get_bert_token_mapping(opt.fasttext_type).items():
         dict_["iwords"][tokenizer.convert_tokens_to_ids([bert_token])[0]] = orig_token
-
     dict_["words"] = {w: i for i, w in enumerate(dict_["iwords"])}
-
     dict_["wordcounts"] = None  # Not used here
-
     dict_["bert_tokenizer"] = tokenizer
 
     return dict_
@@ -106,10 +96,8 @@ def build_bert_dictionary(opt):
 
 class TrainEnvironment:
     def __init__(self, opt, dictionary=None):
-
         self.opt = opt
         self.dataset_name = opt.dataset_name
-
         if self.dataset_name in ["dailydialog", "empchat"]:
             if dictionary is not None:
                 self.temp_dict = SimplerDictionary.create_from_reddit_style(dictionary)
@@ -131,7 +119,6 @@ class TrainEnvironment:
             self.personas = load_personas(opt, dict_words) if opt.use_personas else {}
         else:
             raise ValueError("Dataset name unrecognized!")
-
         self.pad_idx = self.dict["words"][PAD_TOKEN]
 
     def build_reddit_dataset(self, chunk_id):
@@ -144,8 +131,6 @@ class TrainEnvironment:
             rm_long_sent=self.opt.rm_long_sent,
             max_hist_len=self.opt.max_hist_len,
             rm_long_contexts=self.opt.rm_long_contexts,
-            use_moods=self.opt.use_moods,
-            moods_dir=self.opt.moods_dir,
         )
 
     def build_train_dataloader(self, epoch_id):
@@ -225,10 +210,10 @@ class TrainEnvironment:
         )
         endtoken = None if not self.opt.generate else self.dict["words"][END_OF_COMMENT]
         contexts, next_ = [
-            Variable(pad(ex, self.pad_idx, gen=starttoken, endgen=endtoken))
+            pad(ex, self.pad_idx, gen=starttoken, endgen=endtoken)
             for ex in [input_list[0], input_list[2]]
         ]
-        personas = Variable(pad(input_list[1], self.pad_idx))
+        personas = pad(input_list[1], self.pad_idx)
         return contexts, personas, next_
 
     def to_words(self, tensor):
@@ -236,7 +221,6 @@ class TrainEnvironment:
 
 
 def pad(tensors, padding_value=-1, gen=None, endgen=None):
-
     max_len = max(t.size(-1) for t in tensors)
     if tensors[0].dim() == 1:
         if gen is not None:
@@ -282,36 +266,26 @@ def split_persona_line(line, dictionary, max_n_personas):
 
 
 def load_personas(opt, dictionary, split_sentences=True):
-
     logging.info(f"Loading personas from {opt.personas}")
     if "encoded" in opt.personas:
         return torch.load(opt.personas)
-
     uid2personas = {}
     max_n_personas = opt.max_personas
-
     with open(opt.personas, "r") as f:
-
-        for line in tqdm(f):
-
+        for line in tqdm.tqdm(f, desc='Looping over personas'):
             if hasattr(opt, "lowercase_personas") and opt.lowercase_personas:
                 line = line.lower()
-
             uid, personas = line.split(",", 1)
-
             if split_sentences:
-
                 sentences_for_uid = split_persona_line(line, dictionary, max_n_personas)
                 if len(sentences_for_uid) == 0:
                     continue
                 tensor_length = max(len(sentence) for sentence in sentences_for_uid)
-
                 persona_w = torch.LongTensor(
                     len(sentences_for_uid), tensor_length
                 ).fill_(dictionary[PAD_TOKEN])
                 for i, sentence in enumerate(sentences_for_uid):
                     persona_w[i, : len(sentence)] = torch.LongTensor(sentence)
-
                 if "emptypersona" in opt and opt.emptypersona:
                     emptypersona = torch.LongTensor(1, tensor_length).fill_(
                         dictionary[PAD_TOKEN]

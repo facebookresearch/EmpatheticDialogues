@@ -14,7 +14,6 @@ PARLAI_PAD_TOKEN = "__PAD__"
 EMPTYPERSONA_TOKEN = "<PER>"
 START_OF_COMMENT = "<SOC>"
 END_OF_COMMENT = "<EOC>"
-
 BERT_ID = "bert-base-cased"
 
 

@@ -22,7 +22,6 @@ def create_position_codes(n_pos, dim, out):
             for pos in range(n_pos)
         ]
     )
-
     out[:, 0::2] = torch.FloatTensor(np.sin(position_enc[:, 0::2]))
     out[:, 1::2] = torch.FloatTensor(np.cos(position_enc[:, 1::2]))
     out.detach_()
@@ -64,14 +63,12 @@ class TransformerModel(nn.Module):
         n_positions = 1000
         self.position_embeddings = nn.Embedding(n_positions, dim)
         create_position_codes(n_positions, dim, out=self.position_embeddings.weight)
-
         if embedding is not None:
             self.embeddings = embedding
         elif padding_idx is not None:
             self.embeddings = nn.Embedding(vocabulary_dim, dim, padding_idx=padding_idx)
         else:
             self.embeddings = nn.Embedding(vocabulary_dim, dim)
-
         self.dim = dim
         self.attentions = nn.ModuleList()
         self.layer_norm1 = nn.ModuleList()
@@ -101,21 +98,17 @@ class TransformerModel(nn.Module):
         positions = torch.arange(seq_len, out=positions).unsqueeze(0)
         tensor = self.embeddings(input_)
         tensor = tensor + self.position_embeddings(positions).expand_as(tensor)
-
         tensor *= mask.unsqueeze(-1).float()
-
         for i in range(self.n_layers):
             tensor = tensor + self.attentions[i](tensor, mask)
             tensor = self.normalize(tensor, self.layer_norm1[i])
             tensor = tensor + self.ffns[i](tensor, mask)
             tensor = self.normalize(tensor, self.layer_norm2[i])
-
             tensor *= mask.unsqueeze(-1).float()
         if self.fix_mean:
             output = tensor.sum(dim=1) / mask.float().sum(dim=1).unsqueeze(-1)
         else:
             output = tensor.mean(dim=1)
-
         return output
 
     def normalize(self, tensor, norm_layer):
@@ -136,7 +129,6 @@ class MultiHeadAttention(nn.Module):
         super(MultiHeadAttention, self).__init__()
         self.n_heads = n_heads
         self.dim = dim
-
         # multi head is seen as one layer, dropout is only applied to the input
         self.in_dropout = nn.Dropout(p=dropout)
         self.q_lin = nn.Linear(dim, dim)
@@ -146,7 +138,6 @@ class MultiHeadAttention(nn.Module):
         nn.init.xavier_normal_(self.k_lin.weight)
         nn.init.xavier_normal_(self.v_lin.weight)
         self.out_lin = nn.Linear(dim, dim)
-
         nn.init.xavier_normal_(self.out_lin.weight)
 
     def forward(self, input_, mask):
@@ -175,7 +166,6 @@ class MultiHeadAttention(nn.Module):
         keys = prepare_head(self.k_lin(in_droped))
         values = prepare_head(self.v_lin(in_droped))
         scale = math.sqrt(dim_per_head)
-
         dot_prod = query.bmm(keys.transpose(1, 2))
         # [B * n_heads, seq_len, seq_len]
         attn_mask = (
@@ -185,9 +175,7 @@ class MultiHeadAttention(nn.Module):
             .view(batch_size * n_heads, seq_len, seq_len)
         )
         dot_prod.masked_fill_(attn_mask, -float("inf"))
-
         attn_weights = F.softmax(dot_prod / scale, dim=-1)
-
         attentioned = attn_weights.bmm(values)
         attentioned = (
             attentioned.view(batch_size, n_heads, seq_len, dim_per_head)
@@ -216,14 +204,12 @@ class TransformerAdapter(nn.Module):
         super(TransformerAdapter, self).__init__()
         self.opt = opt
         self.pad_idx = dictionary[PAD_TOKEN]
-
         self.embeddings = nn.Embedding(
             len(dictionary), opt.embeddings_size, padding_idx=self.pad_idx
         )
         if not opt.learn_embeddings:
             self.embeddings.weight.requires_grad = False
         nn.init.normal_(self.embeddings.weight, mean=0, std=0.05)
-
         dropout = opt.transformer_dropout if opt.transformer_dropout else 0
         self.ctx_transformer = TransformerModel(
             opt.transformer_n_heads,
@@ -234,7 +220,6 @@ class TransformerAdapter(nn.Module):
             dropout=dropout,
             use_manual_norm=opt.use_manual_norm,
         )
-
         dim = self.ctx_transformer.dim
         hdim = dim * opt.transformer_response_hmul
         if opt.two_transformers:
@@ -253,40 +238,19 @@ class TransformerAdapter(nn.Module):
             )
         self.embeddings = self.ctx_transformer.embeddings
 
-        self.mood_dropout = nn.Dropout(p=opt.moods_dropout)
-        self.mood_dnn = nn.Sequential(nn.Linear(self.opt.moods_dims, dim))
-
-    def forward(self, context_w, personas_w, cands_w, moods=None):
+    def forward(self, context_w, personas_w, cands_w):
         if context_w is not None:
             context_mask = context_w != self.pad_idx
             context_h = self.ctx_transformer(context_w, context_mask)
             if self.opt.normalize_sent_emb:
                 context_h = context_h / context_h.norm(2, dim=1, keepdim=True)
-            if moods is not None:
-                # dropout some of the moods randomly. This way the network does
-                # not rely too much on the mood.
-                # create a mask on the same device as context
-                if (
-                    moods.shape[0] > 0
-                    and moods.shape[1] > 0
-                    and self.opt.moods_dropout != 1
-                ):
-                    mask = torch.ones(
-                        moods.shape[0], dtype=context_h.dtype, device=context_h.device
-                    ).unsqueeze(1)
-                    mask = self.mood_dropout(mask)
-                    mask = mask.expand(moods.shape[0], moods.shape[1])
-                    moods *= mask
-                    context_h += self.mood_dnn(moods)
         else:
             context_h = None
-
         if cands_w is not None:
             cands_mask = cands_w != self.pad_idx
             cands_h = self.cand_transformer(cands_w, cands_mask)
             if self.opt.normalize_sent_emb:
                 cands_h = cands_h / cands_h.norm(2, dim=1, keepdim=True)
-
         else:
             cands_h = None
         return context_h, cands_h

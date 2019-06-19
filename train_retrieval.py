@@ -11,7 +11,6 @@ import time
 import torch
 import torch.nn.functional as F
 import torch.optim as optim
-from torch.autograd import Variable
 
 from ed.datasets.loader import TrainEnvironment
 from ed.datasets.tokens import PAD_TOKEN
@@ -40,14 +39,11 @@ def loss_fn(ctx, labels):
     batch_size = ctx.size(0)
     dot_products = ctx.mm(labels.t())
     # [batch, batch]
-
     log_prob = F.log_softmax(dot_products, dim=1)
     targets = log_prob.new_empty(batch_size).long()
     targets = torch.arange(batch_size, out=targets)
     loss = F.nll_loss(log_prob, targets)
-
     nb_ok = (log_prob.max(dim=1)[1] == targets).float().sum()
-
     return loss, nb_ok
 
 
@@ -60,11 +56,10 @@ def train(epoch, start_time, model, optimizer, opt_, data_loader):
     nb_exs = 0
     nb_losses = 0
     epoch_start = time.time()
-
     # Run one epoch
     for idx, ex in enumerate(data_loader, 1):
         params = [
-            Variable(field.cuda(non_blocking=True) if opt_.cuda else field)
+            field.cuda(non_blocking=True) if opt_.cuda else field
             if field is not None
             else None
             for field in ex
@@ -75,10 +70,8 @@ def train(epoch, start_time, model, optimizer, opt_, data_loader):
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
-
         train_loss += loss.sum().item()
         nb_losses += 1
-
         if idx % opt_.display_iter == 0 or idx == len(data_loader):
             avg_loss = train_loss / nb_losses
             acc = 100 * nb_ok / nb_exs
@@ -89,7 +82,6 @@ def train(epoch, start_time, model, optimizer, opt_, data_loader):
             )
             train_loss = 0
             nb_losses = 0
-
     epoch_elapsed = time.time() - epoch_start
     logging.info(
         "train: Epoch %d done. Time for epoch = %.2f (s)" % (epoch, epoch_elapsed)
@@ -121,7 +113,7 @@ def validate(
             n_skipped += batch_size
             continue
         params = [
-            Variable(field.cuda(non_blocking=True) if opt.cuda else field)
+            field.cuda(non_blocking=True) if opt.cuda else field
             if field is not None
             else None
             for field in ex
@@ -136,7 +128,6 @@ def validate(
         examples += batch_size
         if examples >= max_exs and dtype == "reddit":
             break
-
     n_examples = 0
     if len(all_context) > 0:
         logging.info("Processing candidate top-K")
@@ -155,7 +146,6 @@ def validate(
                 n_correct[acc_range] += n_acc
             n_examples += n_cands
         accuracies = {r: 100 * n_acc / n_examples for r, n_acc in n_correct.items()}
-
         avg_loss = sum_losses / (n_losses + 0.00001)
         avg_acc = 100 * correct / (examples + 0.000001)
         logging.info(
@@ -174,12 +164,10 @@ def train_model(opt_):
     env = TrainEnvironment(opt_)
     dictionary = env.dict
     wordcounts = dictionary["wordcounts"]
-
     if opt_.bow_do_idf:
         opt_.idfs = make_idf_tensor(wordcounts, dictionary)
     else:
         opt_.idfs = None
-
     if opt_.load_checkpoint:
         net, dictionary = load_model(opt_.load_checkpoint, opt_)
         env = TrainEnvironment(opt_, dictionary)
@@ -188,7 +176,6 @@ def train_model(opt_):
         net = create_model(opt_, dictionary["words"])
         if opt_.embeddings and opt_.embeddings != "None":
             load_embeddings(opt_, dictionary["words"], net)
-
     paramnum = 0
     trainable = 0
     for name, parameter in net.named_parameters():
@@ -199,7 +186,6 @@ def train_model(opt_):
     if opt_.cuda:
         net = torch.nn.DataParallel(net)
         net = net.cuda()
-
     if opt_.optimizer == "adamax":
         lr = opt_.learning_rate or 0.002
         named_params_to_optimize = filter(
@@ -222,7 +208,6 @@ def train_model(opt_):
     best_loss = float("+inf")
     test_data_shuffled = env.build_valid_dataloader(True)
     test_data_not_shuffled = env.build_valid_dataloader(False)
-
     with torch.no_grad():
         validate(
             0,
@@ -231,15 +216,11 @@ def train_model(opt_):
             nb_candidates=opt_.hits_at_nb_cands,
             shuffled_str="shuffled",
         )
-
     train_data = None
     for epoch in range(opt_.epoch_start, opt_.num_epochs):
-
         if train_data is None or opt_.dataset_name == "reddit":
             train_data = env.build_train_dataloader(epoch)
-
         train(epoch, start_time, net, optimizer, opt_, train_data)
-
         with torch.no_grad():
             # We compute the loss both for shuffled and not shuffled case.
             # however, the loss that determines if the model is better is the
@@ -267,12 +248,10 @@ def train_model(opt_):
                 best_loss_epoch = epoch
                 logging.info(f"New best loss, saving model to {opt_.model_file}")
                 save_model(opt_.model_file, net, dictionary, optimizer)
-
             # Stop if it's been too many epochs since the loss has decreased
             if opt_.stop_crit_num_epochs != -1:
                 if epoch - best_loss_epoch >= opt_.stop_crit_num_epochs:
                     break
-
     return net, dictionary
 
 
@@ -282,7 +261,6 @@ def _optimize_param(p, opt_):
 
 def main(opt_):
     if opt_.pretrained:
-
         net, dictionary = load_model(opt_.pretrained, opt_)
         net.opt.dataset_name = opt_.dataset_name
         net.opt.reddit_folder = opt_.reddit_folder
@@ -290,7 +268,6 @@ def main(opt_):
         net.opt.reactonly = opt_.reactonly
         net.opt.max_hist_len = opt_.max_hist_len
         net.opt.emp_loss = None
-
         env = TrainEnvironment(net.opt, dictionary)
         if opt_.cuda:
             net = torch.nn.DataParallel(net.cuda())
@@ -316,23 +293,17 @@ def main(opt_):
             validate(
                 0, net, test_data, is_test=True, nb_candidates=opt_.hits_at_nb_cands
             )
-
     else:
         train_model(opt_)
 
 
 if __name__ == "__main__":
-
     opt = get_opt()
-
     # Set random state
     torch.manual_seed(opt.random_seed)
-
     opt.cuda = opt.cuda and torch.cuda.is_available()
     if opt.cuda:
         torch.cuda.manual_seed(opt.random_seed)
-
     # Set logging
     logger = get_logger(opt)
-
     main(opt)

@@ -78,7 +78,6 @@ def sentence_to_tensor(dic, sentence, maxlen=None, fasttext_type=None):
     indexes = txt2vec(dic, sentence, fasttext_type)
     if maxlen is not None and maxlen <= len(indexes):
         indexes = indexes[: maxlen - 1]
-
     if type(dic) is SimplerDictionary:
         return torch.LongTensor(indexes)
     else:
@@ -100,7 +99,6 @@ class EmpDataset(Dataset):
         fasttext_type=None,
         fasttext_path=None,
     ):
-
         topicmap = {
             "alt.atheism": "atheism",
             "comp.graphics": "graphics",
@@ -131,14 +129,11 @@ class EmpDataset(Dataset):
         self.max_hist_len = history_len
         if fasttext is not None:
             import fastText
-
             assert fasttext_type is not None and fasttext_path is not None
             self.ftmodel = fastText.FastText.load_model(fasttext_path)
             newmaxlen += fasttext
             maxlen += fasttext
-
             if hasattr(dic, "bert_tokenizer"):
-
                 try:
                     from pytorch_pretrained_bert import BertTokenizer
                 except ImportError:
@@ -146,7 +141,6 @@ class EmpDataset(Dataset):
                         "BERT rankers needs pytorch-pretrained-BERT installed. "
                         "\npip install pytorch-pretrained-bert"
                     )
-
                 # Replace the tokenizer with a new one that won't split any of
                 # the fastText labels
                 new_tokenizer = BertTokenizer.from_pretrained(
@@ -161,16 +155,13 @@ class EmpDataset(Dataset):
                 # ^ This should fail if the original tokenizer was not from the
                 # 'bert-base-cased' model
                 dic.bert_tokenizer = new_tokenizer
-
         self.reactonly = reactonly
         self.data = []
         self.ids = []
         history = []
-
         for i in range(1, len(df)):
             cparts = df[i - 1].strip().split(",")
             sparts = df[i].strip().split(",")
-
             if cparts[0] == sparts[0]:
                 prevsent = cparts[5].replace("_comma_", ",")
                 history.append(prevsent)
@@ -190,7 +181,6 @@ class EmpDataset(Dataset):
                                 + " "
                                 + prev_str
                             )
-
                     contextt = sentence_to_tensor(
                         dic, prev_str, fasttext_type=fasttext_type
                     )[:newmaxlen]
@@ -206,7 +196,6 @@ class EmpDataset(Dataset):
                                 + " "
                                 + sent
                             )
-
                     label = sentence_to_tensor(dic, sent, fasttext_type=fasttext_type)[
                         :maxlen
                     ]
@@ -216,7 +205,6 @@ class EmpDataset(Dataset):
                     else:
                         persona = get_emo(cparts[2])
                         lbl_min = torch.LongTensor([[dic[sparts[2]]]])
-
                     self.data.append((contextt, persona, label, lbl_min))
                     self.ids.append((sparts[0], sparts[1]))
             else:

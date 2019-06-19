@@ -54,9 +54,6 @@ def get_parser():
     parser.add_argument("--model", type=str, choices=["bert", "transformer"])
     parser.add_argument("--model-dir", type=str)
     parser.add_argument("--model-name", type=str)
-    parser.add_argument("--moods-dir", type=str)
-    parser.add_argument("--moods-dims", type=int, default=216)
-    parser.add_argument("--moods-dropout", type=float, default=1)
     parser.add_argument("--n-layers", type=int, default=6)
     parser.add_argument("--normalize-emb", action="store_true")
     parser.add_argument("--normalize-sent-emb", action="store_true")
@@ -78,7 +75,6 @@ def get_parser():
     parser.add_argument("--two-transformers", action="store_true")
     parser.add_argument("--use-personas", action="store_true")
     parser.add_argument("--use-manual-norm", action="store_true")
-    parser.add_argument("--use-moods", action="store_true")
     parser.add_argument("-bs", "--batch-size", type=int, default=32)
     parser.add_argument("-e", "--epoch-start", type=int, default=0)
     parser.add_argument("-lr", "--learning-rate", type=float, default=None)
@@ -98,7 +94,6 @@ def set_defaults(opt):
     if not opt.model_name:
         import uuid
         import time
-
         opt.model_name = time.strftime("%Y%m%d-") + str(uuid.uuid4())[:8]
 
     # Set log + model file names
@@ -110,7 +105,6 @@ def set_defaults(opt):
 def get_logger(opt):
     logger = logging.getLogger()
     logger.setLevel(logging.INFO)
-
     fmt = logging.Formatter("%(asctime)s: [ %(message)s ]", "%m/%d/%Y %I:%M:%S %p")
     console = logging.StreamHandler()
     console.setFormatter(fmt)
@@ -122,5 +116,4 @@ def get_logger(opt):
     logger.info("COMMAND: %s" % " ".join(sys.argv))
     logger.info("-" * 100)
     logger.info("CONFIG:\n%s" % json.dumps(vars(opt), indent=4, sort_keys=True))
-
     return logger

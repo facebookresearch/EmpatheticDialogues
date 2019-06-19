@@ -19,9 +19,7 @@ from ed.datasets.tokens import (
 
 class BertAdapter(nn.Module):
     def __init__(self, opt, dictionary):
-
         from parlai.agents.bert_ranker.helpers import BertWrapper
-
         try:
             from pytorch_pretrained_bert import BertModel
         except ImportError:
@@ -29,11 +27,9 @@ class BertAdapter(nn.Module):
                 "BERT rankers needs pytorch-pretrained-BERT installed. "
                 "\npip install pytorch-pretrained-bert"
             )
-
         super().__init__()
         self.opt = opt
         self.pad_idx = dictionary[PAD_TOKEN]
-
         self.ctx_bert = BertWrapper(
             bert_model=BertModel.from_pretrained(BERT_ID),
             output_dim=opt.bert_dim,
@@ -65,11 +61,7 @@ class BertAdapter(nn.Module):
         self.ctx_bert.bert_model.embeddings.word_embeddings.weight.detach_()
         self.cand_bert.bert_model.embeddings.word_embeddings.weight.detach_()
 
-    def forward(self, context_w, personas_w, cands_w, moods=None):
-
-        if moods is not None:
-            raise NotImplementedError("Moods currently unsupported!")
-
+    def forward(self, context_w, personas_w, cands_w):
         if context_w is not None:
             context_segments = torch.zeros_like(context_w)
             context_mask = context_w != self.pad_idx
@@ -82,7 +74,6 @@ class BertAdapter(nn.Module):
                 context_h = context_h / context_h.norm(2, dim=1, keepdim=True)
         else:
             context_h = None
-
         if cands_w is not None:
             cands_segments = torch.zeros_like(cands_w)
             cands_mask = cands_w != self.pad_idx
@@ -93,5 +84,4 @@ class BertAdapter(nn.Module):
                 cands_h = cands_h / cands_h.norm(2, dim=1, keepdim=True)
         else:
             cands_h = None
-
         return context_h, cands_h

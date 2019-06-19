@@ -48,7 +48,14 @@ Please cite [1] [ADD LINK] if you found the resources in this repository useful.
 
 [1] H. Rashkin, E. M. Smith, M. Li, Y. Boureau *Towards Empathetic Open-domain Conversation Models: a New Benchmark and Dataset* [ADD LINK]
 
-[ADD ARXIV-STYLE CITATION]
+```
+@inproceedings{rashkin2019towards,
+  title = {Towards Empathetic Open-domain Conversation Models: a New Benchmark and Dataset},
+  author = {Hannah Rashkin and Eric Michael Smith and Margaret Li and Y-Lan Boureau},
+  booktitle = {ACL},
+  year = {2019},
+}
+```
 
 ## License
 

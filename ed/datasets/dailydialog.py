@@ -31,7 +31,6 @@ def getmode(array, removenone=False):
 
 def multifeel_to_one(emo_context):
     maxemo = getmode(emo_context, removenone=True)
-
     if len(maxemo) > 1:
         np.random.shuffle(maxemo)
         return maxemo[0]
@@ -53,16 +52,11 @@ class DDDataset(Dataset):
     def __init__(
         self, splitname, dic, data_folder, maxlen=100, history_len=1, reactonly=False
     ):
-
         df = self.read_dailydialog_data(data_folder, splitname)
-
         self.max_hist_len = history_len
-
         self.reactonly = reactonly
         self.data = []
-
         for i in range(df.shape[0]):
-
             row = df.iloc[i]
             sent = row["line"]
             history = row["context"]

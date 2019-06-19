@@ -83,7 +83,6 @@ def load(filename, new_opt):
 
 
 def create(opt, dict_words):
-
     if opt.model == "bert":
         return BertAdapter(opt, dict_words)
     elif opt.model == "transformer":
