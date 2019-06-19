@@ -47,7 +47,7 @@ def load_embeddings(opt, dictionary, model):
 
 
 def save(filename, net, dictionary, optimizer):
-    if isinstance(net, nn.DataParallel):
+    if isinstance(net, (nn.DataParallel, nn.parallel.DistributedDataParallel)):
         net = net.module
     state_dict = net.state_dict()
     params = {
@@ -56,10 +56,7 @@ def save(filename, net, dictionary, optimizer):
         "opt": net.opt,
         "optim_dict": optimizer.state_dict(),
     }
-    try:
-        torch.save(params, filename)
-    except BaseException:
-        logging.warning("WARN: Saving failed... continuing anyway.")
+    torch.save(params, filename)
 
 
 def load(filename, new_opt):
