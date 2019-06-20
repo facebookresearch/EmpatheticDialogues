@@ -63,7 +63,6 @@ def get_parser():
     parser.add_argument("--transformer-dim", type=int, default=512, help='Input Transformer embedding dim')
     parser.add_argument("--transformer-dropout", type=float, default=0, help='Transformer attention/FFN dropout')
     parser.add_argument("--transformer-n-heads", type=int, default=8, help='Num Transformer attention heads')
-    parser.add_argument("--use-manual-norm", action="store_true")
     parser.add_argument("-bs", "--batch-size", type=int, default=32)
     parser.add_argument("-e", "--epoch-start", type=int, default=0)
     parser.add_argument("-lr", "--learning-rate", type=float, default=None)

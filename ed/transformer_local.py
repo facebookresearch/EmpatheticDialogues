@@ -36,7 +36,6 @@ class TransformerModel(nn.Module):
         transformer_dim,
         vocabulary_dim,
         embedding=None,
-        use_manual_norm=False,
         fix_mean=True,
         dropout=0,
         padding_idx=None,
@@ -64,16 +63,11 @@ class TransformerModel(nn.Module):
         self.ffns = nn.ModuleList()
         self.layer_norm2 = nn.ModuleList()
 
-        def build_norm_layer():
-            if use_manual_norm:
-                return ManualNormalize()
-            return nn.LayerNorm([dim])
-
         for _ in range(self.n_layers):
             self.attentions.append(MultiHeadAttention(n_heads, dim, dropout=dropout))
-            self.layer_norm1.append(build_norm_layer())
+            self.layer_norm1.append(nn.LayerNorm([dim]))
             self.ffns.append(TransformerFFN(dim, dim_hidden, dropout=dropout))
-            self.layer_norm2.append(build_norm_layer())
+            self.layer_norm2.append(nn.LayerNorm([dim]))
 
     def forward(self, input_, mask):
         """
@@ -103,14 +97,6 @@ class TransformerModel(nn.Module):
     def normalize(self, tensor, norm_layer):
         size = tensor.size()
         return norm_layer(tensor.view(-1, self.dim)).view(size)
-
-
-class ManualNormalize(nn.Module):
-    def __init__(self):
-        super(ManualNormalize, self).__init__()
-
-    def forward(self, input_):
-        return input_
 
 
 class MultiHeadAttention(nn.Module):
@@ -207,7 +193,6 @@ class TransformerAdapter(nn.Module):
             len(dictionary),
             embedding=self.embeddings,
             dropout=dropout,
-            use_manual_norm=opt.use_manual_norm,
         )
         dim = self.ctx_transformer.dim
         self.cand_transformer = TransformerModel(
@@ -217,7 +202,6 @@ class TransformerAdapter(nn.Module):
             len(dictionary),
             embedding=self.embeddings,
             dropout=dropout,
-            use_manual_norm=opt.use_manual_norm,
         )
         self.embeddings = self.ctx_transformer.embeddings
 
