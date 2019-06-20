@@ -35,9 +35,6 @@ def load_embeddings(opt, dictionary, model):
                     vec = vec / vec.norm(2)
                 emb_table.data[dictionary[w]] = vec
                 missing_dict.remove(w)
-                if opt.fast_debug and n_added > 1000:
-                    logging.warning("Loading only first embeddings for debugging")
-                    break
     sample = ", ".join(list(missing_dict)[:8])
     logging.info(
         f"Loaded {n_added} vectors from embeddings file; {len(missing_dict)} are missing, among which: {sample}"

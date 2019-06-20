@@ -203,12 +203,8 @@ class TrainEnvironment:
 
     def batchify(self, batch):
         input_list = list(zip(*batch))
-        starttoken = (
-            None if not self.opt.generate else self.dict["words"][START_OF_COMMENT]
-        )
-        endtoken = None if not self.opt.generate else self.dict["words"][END_OF_COMMENT]
         contexts, next_ = [
-            pad(ex, self.pad_idx, gen=starttoken, endgen=endtoken)
+            pad(ex, self.pad_idx)
             for ex in [input_list[0], input_list[1]]
         ]
         return contexts, next_
@@ -217,37 +213,21 @@ class TrainEnvironment:
         return " ".join(self.dict["iwords"][x] for x in tensor.tolist())
 
 
-def pad(tensors, padding_value=-1, gen=None, endgen=None):
+def pad(tensors, padding_value=-1):
     """
-    Concatenate and pad the input tensors, which may be 1D or 2D. If gen and endgen are
-    not None, add them as BOS/EOS tokens.
+    Concatenate and pad the input tensors, which may be 1D or 2D.
     """
     max_len = max(t.size(-1) for t in tensors)
-    add_bos_eos = (gen is not None and endgen is not None)
     if tensors[0].dim() == 1:
-        if add_bos_eos:
-            max_len += 2
         out = torch.LongTensor(len(tensors), max_len).fill_(padding_value)
         for i, t in enumerate(tensors):
-            if add_bos_eos:
-                out[i, 0] = gen
-                out[i, 1 : t.size(0) + 1] = t
-                out[i, t.size(0) + 1] = endgen
-            else:
-                out[i, : t.size(0)] = t
+            out[i, : t.size(0)] = t
         return out
     elif tensors[0].dim() == 2:
         max_width = max(t.size(0) for t in tensors)
-        if add_bos_eos:
-            max_width += 2
         out = torch.LongTensor(len(tensors), max_width, max_len).fill_(padding_value)
         for i, t in enumerate(tensors):
-            if add_bos_eos:
-                out[i, 0, : t.size(1)] = gen
-                out[i, 1 : t.size(0) + 1, : t.size(1)] = t
-                out[i, t.size(0) + 1, : t.size(1)] = endgen
-            else:
-                out[i, : t.size(0), : t.size(1)] = t
+            out[i, : t.size(0), : t.size(1)] = t
         return out
     else:
         raise ValueError('Input tensors must be either 1D or 2D!')
