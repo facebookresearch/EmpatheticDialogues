@@ -115,7 +115,6 @@ class TrainEnvironment:
             if EMPTYPERSONA_TOKEN not in self.dict["words"]:
                 self.dict["iwords"].append(EMPTYPERSONA_TOKEN)
                 self.dict["words"] = {w: i for i, w in enumerate(self.dict["iwords"])}
-            dict_words = self.dict["words"]
         else:
             raise ValueError("Dataset name unrecognized!")
         self.pad_idx = self.dict["words"][PAD_TOKEN]
@@ -137,6 +136,7 @@ class TrainEnvironment:
                 "train",
                 self.temp_dict,
                 data_folder=self.opt.empchat_folder,
+                maxlen=self.opt.max_sent_len,
                 reactonly=self.opt.reactonly,
                 history_len=self.opt.max_hist_len,
                 emp_loss=self.opt.emp_loss,
@@ -181,6 +181,7 @@ class TrainEnvironment:
                 splitname,
                 self.temp_dict,
                 data_folder=self.opt.empchat_folder,
+                maxlen=self.opt.max_sent_len,
                 reactonly=self.opt.reactonly,
                 history_len=self.opt.max_hist_len,
                 emp_loss=self.opt.emp_loss,
