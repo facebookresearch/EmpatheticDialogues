@@ -37,7 +37,8 @@ def load_embeddings(opt, dictionary, model):
                 missing_dict.remove(w)
     sample = ", ".join(list(missing_dict)[:8])
     logging.info(
-        f"Loaded {n_added} vectors from embeddings file; {len(missing_dict)} are missing, among which: {sample}"
+        f"Loaded {n_added} vectors from embeddings file; {len(missing_dict)} are "
+        f"missing, among which: {sample}"
     )
     emb_table.detach_()
     emb_table.requires_grad = requires_grad

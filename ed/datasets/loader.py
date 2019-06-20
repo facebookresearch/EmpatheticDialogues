@@ -10,7 +10,6 @@ import os
 import os.path
 
 import torch
-import tqdm
 from torch.utils.data import DataLoader
 
 from ed.datasets.empchat import EmpDataset

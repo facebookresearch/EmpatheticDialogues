@@ -194,7 +194,6 @@ class TransformerAdapter(nn.Module):
             embedding=self.embeddings,
             dropout=dropout,
         )
-        dim = self.ctx_transformer.dim
         self.cand_transformer = TransformerModel(
             opt.transformer_n_heads,
             opt.n_layers,

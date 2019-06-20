@@ -15,7 +15,6 @@ import torch.nn.functional as F
 import torch.optim as optim
 
 from ed.datasets.loader import TrainEnvironment
-from ed.datasets.tokens import PAD_TOKEN
 from ed.models import (
     create as create_model,
     load as load_model,
@@ -74,7 +73,9 @@ def train(epoch, start_time, model, optimizer, opt_, data_loader):
             acc = 100 * nb_ok / nb_exs
             elapsed = time.time() - start_time
             logging.info(
-                f"train: Epoch = {epoch} | iter = {idx}/{len(data_loader)} | loss = {avg_loss:.3f} | batch P@1 = {acc:.2f} % | elapsed time = {elapsed:.2f} (s)"
+                f"train: Epoch = {epoch} | iter = {idx}/{len(data_loader)} | loss = "
+                f"{avg_loss:.3f} | batch P@1 = {acc:.2f} % | elapsed time = "
+                f"{elapsed:.2f} (s)"
             )
             train_loss = 0
             nb_losses = 0
@@ -148,7 +149,8 @@ def validate(
         avg_acc = 100 * correct / (examples + 0.000001)
         valid_time = time.time() - eval_start
         logging.info(
-            f"Valid ({shuffled_str}): Epoch = {epoch:d} | avg loss = {avg_loss:.3f} | batch P@1 = {avg_acc:.2f} % | "
+            f"Valid ({shuffled_str}): Epoch = {epoch:d} | avg loss = {avg_loss:.3f} | "
+            f"batch P@1 = {avg_acc:.2f} % | "
             + f" | ".join(
                 f"P@{k},{nb_candidates} = {v:.2f}%" for k, v in accuracies.items()
             )

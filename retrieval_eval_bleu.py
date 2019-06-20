@@ -482,13 +482,19 @@ def get_bleu4(split, history_len=1):
     print(scorer.result_string(order=4))
     print(actual_ct)
     print(
-        f"EmpatheticDialogues {int(source_ct[1]):d}: selected {float(source_ct[1]) / sum(source_ct)}%, but total: {float(actual_ct[1]) / sum(actual_ct)}"
+        f"EmpatheticDialogues {int(source_ct[1]):d}: selected "
+        f"{float(source_ct[1]) / sum(source_ct)}%, but total: "
+        f"{float(actual_ct[1]) / sum(actual_ct)}"
     )
     print(
-        f"DailyDialog {int(source_ct[2]):d}: selected {float(source_ct[2]) / sum(source_ct)}%, but total: {float(actual_ct[2]) / sum(actual_ct)}"
+        f"DailyDialog {int(source_ct[2]):d}: selected "
+        f"{float(source_ct[2]) / sum(source_ct)}%, but total: "
+        f"{float(actual_ct[2]) / sum(actual_ct)}"
     )
     print(
-        f"Reddit {int(source_ct[0]):d}: selected {float(source_ct[0]) / sum(source_ct)}%, but total: {float(actual_ct[0]) / sum(actual_ct)}"
+        f"Reddit {int(source_ct[0]):d}: selected "
+        f"{float(source_ct[0]) / sum(source_ct)}%, but total: "
+        f"{float(actual_ct[0]) / sum(actual_ct)}"
     )
 
 
