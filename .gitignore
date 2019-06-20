@@ -1,2 +1,7 @@
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+
 # PyCharm
 .idea/
