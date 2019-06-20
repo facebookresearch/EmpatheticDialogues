@@ -221,32 +221,39 @@ class TrainEnvironment:
 
 
 def pad(tensors, padding_value=-1, gen=None, endgen=None):
+    """
+    Concatenate and pad the input tensors, which may be 1D or 2D. If gen and endgen are
+    not None, add them as BOS/EOS tokens.
+    """
     max_len = max(t.size(-1) for t in tensors)
+    add_bos_eos = (gen is not None and endgen is not None)
     if tensors[0].dim() == 1:
-        if gen is not None:
+        if add_bos_eos:
             max_len += 2
         out = torch.LongTensor(len(tensors), max_len).fill_(padding_value)
         for i, t in enumerate(tensors):
-            if gen is not None:
+            if add_bos_eos:
                 out[i, 0] = gen
                 out[i, 1 : t.size(0) + 1] = t
                 out[i, t.size(0) + 1] = endgen
             else:
                 out[i, : t.size(0)] = t
         return out
-    else:
+    elif tensors[0].dim() == 2:
         max_width = max(t.size(0) for t in tensors)
-        if gen is not None:
+        if add_bos_eos:
             max_width += 2
         out = torch.LongTensor(len(tensors), max_width, max_len).fill_(padding_value)
         for i, t in enumerate(tensors):
-            if gen is not None:
+            if add_bos_eos:
                 out[i, 0, : t.size(1)] = gen
                 out[i, 1 : t.size(0) + 1, : t.size(1)] = t
                 out[i, t.size(0) + 1, : t.size(1)] = endgen
             else:
                 out[i, : t.size(0), : t.size(1)] = t
         return out
+    else:
+        raise ValueError('Input tensors must be either 1D or 2D!')
 
 
 def split_persona_line(line, dictionary, max_n_personas):
