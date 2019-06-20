@@ -50,11 +50,10 @@ def sentence_to_tensor(dic, sentence):
 
 class DDDataset(Dataset):
     def __init__(
-        self, splitname, dic, data_folder, maxlen=100, history_len=1, reactonly=False
+        self, splitname, dic, data_folder, maxlen=100, history_len=1
     ):
         df = self.read_dailydialog_data(data_folder, splitname)
         self.max_hist_len = history_len
-        self.reactonly = reactonly
         self.data = []
         for i in range(df.shape[0]):
             row = df.iloc[i]

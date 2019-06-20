@@ -72,7 +72,7 @@ parser.add_argument("--name", type=str, help='Part of name of response output fi
 parser.add_argument("--fasttext", type=int, default=None, help='Number of fastText labels to prepend')
 parser.add_argument("--fasttext-type", type=str, default=None, help='Specifies labels of fastText classifier')
 parser.add_argument("--fasttext-path", type=str, default=None, help='Path to fastText classifier')
-parser.add_argument("--reactonly", action="store_true", help='Only consider Listener responses')
+parser.add_argument("--reactonly", action="store_true", help='EmpatheticDialogues: only consider Listener responses')
 parser.add_argument("--dailydialog-cands", action="store_true", help="Include DailyDialog candidates")
 parser.add_argument("--empchat-cands", action="store_true", help="Include EmpatheticDialogues candidates")
 parser.add_argument("--reddit-cands", action="store_true", help="Include Reddit candidates")
@@ -211,7 +211,7 @@ def build_candidates(
     actual_ct[1] = i
     if args.dailydialog_cands:
         dataset = DDDataset(
-            "train", parlai_dict, data_folder=args.dailydialog_folder, reactonly=False
+            "train", parlai_dict, data_folder=args.dailydialog_folder
         )
         sample_index = range(len(dataset))
         for data_idx in sample_index:
