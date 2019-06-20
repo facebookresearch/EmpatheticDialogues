@@ -60,7 +60,7 @@ parser.add_argument(
 parser.add_argument(
     "--n-candidates", type=int, default=int(1e6), help="Max number of candidates"
 )
-parser.add_argument("--normalize-cands", action="store_true")
+parser.add_argument("--normalize-cands", action="store_true", help="Normalize encoded candidates")
 parser.add_argument(
     "--max-cand-length",
     type=int,
@@ -73,15 +73,15 @@ parser.add_argument("--fasttext", type=int, default=None, help='Number of fastTe
 parser.add_argument("--fasttext-type", type=str, default=None, help='Specifies labels of fastText classifier')
 parser.add_argument("--fasttext-path", type=str, default=None, help='Path to fastText classifier')
 parser.add_argument("--reactonly", action="store_true", help='Only consider Listener responses')
-parser.add_argument("--dailydialog-cands", action="store_true")
-parser.add_argument("--empchat-cands", action="store_true")
-parser.add_argument("--reddit-cands", action="store_true")
-parser.add_argument("--dailydialog-folder", type=str)
-parser.add_argument("--empchat-folder", type=str)
-parser.add_argument("--reddit-folder", type=str)
-parser.add_argument("--max-hist-len", type=int, default=1)
+parser.add_argument("--dailydialog-cands", action="store_true", help="Include DailyDialog candidates")
+parser.add_argument("--empchat-cands", action="store_true", help="Include EmpatheticDialogues candidates")
+parser.add_argument("--reddit-cands", action="store_true", help="Include Reddit candidates")
+parser.add_argument("--dailydialog-folder", type=str, help="Path to DailyDialog data folder")
+parser.add_argument("--empchat-folder", type=str, help="Path to EmpatheticDialogues data folder")
+parser.add_argument("--reddit-folder", type=str, help="Path to Reddit data folder")
+parser.add_argument("--max-hist-len", type=int, default=1, help="Max num conversation turns to use in context")
 parser.add_argument("--gpu", type=int, default=-1, help="Specify GPU device id to use")
-parser.add_argument("--task", type=str, choices=["dailydialog", "empchat", "reddit"], default="empchat")
+parser.add_argument("--task", type=str, choices=["dailydialog", "empchat", "reddit"], default="empchat", help="Dataset for context/target-response pairs")
 args = parser.parse_args()
 args.cuda = not args.no_cuda and torch.cuda.is_available()
 if args.cuda:
