@@ -26,13 +26,6 @@ from ed.models import (
 from ed.util import get_logger, get_opt
 
 
-def make_idf_tensor(wordcount, dic):
-    logntot = wordcount.sum().float().log()
-    idfs = logntot - wordcount.float().log()
-    idfs[dic["words"][PAD_TOKEN]] = 0
-    return idfs
-
-
 def loss_fn(ctx, labels):
     assert (
         ctx.size() == labels.size()
@@ -164,11 +157,6 @@ def validate(
 def train_model(opt_):
     env = TrainEnvironment(opt_)
     dictionary = env.dict
-    wordcounts = dictionary["wordcounts"]
-    if opt_.bow_do_idf:
-        opt_.idfs = make_idf_tensor(wordcounts, dictionary)
-    else:
-        opt_.idfs = None
     if opt_.load_checkpoint:
         net, dictionary = load_model(opt_.load_checkpoint, opt_)
         env = TrainEnvironment(opt_, dictionary)

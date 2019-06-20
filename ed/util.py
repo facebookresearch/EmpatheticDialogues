@@ -21,11 +21,10 @@ def get_opt(empty=False):
 
 def get_parser():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--bert-add-transformer-layer", action="store_true")
-    parser.add_argument("--bert-dim", type=int, default=512)
-    parser.add_argument("--bow-do-idf", type=int, default=0)
-    parser.add_argument("--cuda", action="store_true")
-    parser.add_argument("--dailydialog-folder", type=str)
+    parser.add_argument("--bert-add-transformer-layer", action="store_true", help="Add final Transformer layer to BERT model")
+    parser.add_argument("--bert-dim", type=int, default=512, help="Final BERT Transformer layer output dim")
+    parser.add_argument("--cuda", action="store_true", help="Use CUDA")
+    parser.add_argument("--dailydialog-folder", type=str, help="Path to DailyDialog data folder")
     parser.add_argument(
         "--dataset-name",
         type=str,
