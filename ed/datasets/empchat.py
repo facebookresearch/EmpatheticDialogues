@@ -52,7 +52,6 @@ class EmpDataset(Dataset):
         maxlen=100,
         history_len=1,
         reactonly=False,
-        emp_loss=None,
         fasttext=None,
         fasttext_type=None,
         fasttext_path=None,
@@ -157,10 +156,7 @@ class EmpDataset(Dataset):
                     label = sentence_to_tensor(dic, sent, fasttext_type=fasttext_type)[
                         :maxlen
                     ]
-                    if emp_loss is None:
-                        lbl_min = torch.LongTensor([[dic[sparts[2]]]])
-                    else:
-                        lbl_min = torch.LongTensor([[dic[sparts[2]]]])
+                    lbl_min = torch.LongTensor([[dic[sparts[2]]]])
                     self.data.append((contextt, label, lbl_min))
                     self.ids.append((sparts[0], sparts[1]))
             else:

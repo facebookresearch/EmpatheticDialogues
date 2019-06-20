@@ -251,7 +251,6 @@ def main(opt_):
         net.opt.reddit_folder = opt_.reddit_folder
         net.opt.reactonly = opt_.reactonly
         net.opt.max_hist_len = opt_.max_hist_len
-        net.opt.emp_loss = None
         env = TrainEnvironment(net.opt, dictionary)
         if opt_.cuda:
             net = torch.nn.DataParallel(net.cuda())

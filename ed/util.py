@@ -67,7 +67,6 @@ def get_parser():
     parser.add_argument("-e", "--epoch-start", type=int, default=0, help='Initial epoch number when resuming training')
     parser.add_argument("-lr", "--learning-rate", type=float, default=None, help='Training learning rate')
     parser.add_argument("--reactonly", action="store_true", help='EmpatheticDialogues: only consider Listener responses')
-    parser.add_argument("--emp-loss", type=str, default=None)
     parser.add_argument("--fasttext", type=int, default=None)
     parser.add_argument("--fasttext-path", type=str, default=None)
     parser.add_argument("--fasttext-type", type=str, default=None)
