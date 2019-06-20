@@ -37,9 +37,6 @@ logger.addHandler(console)
 
 parser = argparse.ArgumentParser()
 parser.add_argument(
-    "--model", "--pretrained", type=str, default=None, help="Path to model to use"
-)
-parser.add_argument(
     "--bleu-dict",
     type=str,
     default=None,
@@ -49,28 +46,22 @@ parser.add_argument(
     ),
 )
 parser.add_argument(
-    "--save-candidates", action="store_true", help="If true, save candidate files"
-)
-parser.add_argument(
-    "--output-folder", type=str, default=None, help="Path to output folder"
-)
-parser.add_argument(
     "--candidates", type=str, default=None, help="Path to candidates to use"
 )
 parser.add_argument(
-    "--n-candidates", type=int, default=int(1e6), help="Max number of candidates"
+    "--dailydialog-cands", action="store_true", help="Include DailyDialog candidates"
 )
 parser.add_argument(
-    "--normalize-cands", action="store_true", help="Normalize encoded candidates"
+    "--dailydialog-folder", type=str, help="Path to DailyDialog data folder"
 )
 parser.add_argument(
-    "--max-cand-length",
-    type=int,
-    default=20,
-    help="Max candidate length in number of tokens",
+    "--empchat-cands",
+    action="store_true",
+    help="Include EmpatheticDialogues candidates",
 )
-parser.add_argument("--no-cuda", action="store_true", help="Use CPU only")
-parser.add_argument("--name", type=str, help="Part of name of response output file")
+parser.add_argument(
+    "--empchat-folder", type=str, help="Path to EmpatheticDialogues data folder"
+)
 parser.add_argument(
     "--fasttext", type=int, default=None, help="Number of fastText labels to prepend"
 )
@@ -83,36 +74,45 @@ parser.add_argument(
     default=None,
     help="Specifies labels of fastText classifier",
 )
+parser.add_argument("--gpu", type=int, default=-1, help="Specify GPU device id to use")
 parser.add_argument(
-    "--reactonly",
-    action="store_true",
-    help="EmpatheticDialogues: only consider Listener responses",
+    "--max-cand-length",
+    type=int,
+    default=20,
+    help="Max candidate length in number of tokens",
 )
-parser.add_argument(
-    "--dailydialog-cands", action="store_true", help="Include DailyDialog candidates"
-)
-parser.add_argument(
-    "--empchat-cands",
-    action="store_true",
-    help="Include EmpatheticDialogues candidates",
-)
-parser.add_argument(
-    "--reddit-cands", action="store_true", help="Include Reddit candidates"
-)
-parser.add_argument(
-    "--dailydialog-folder", type=str, help="Path to DailyDialog data folder"
-)
-parser.add_argument(
-    "--empchat-folder", type=str, help="Path to EmpatheticDialogues data folder"
-)
-parser.add_argument("--reddit-folder", type=str, help="Path to Reddit data folder")
 parser.add_argument(
     "--max-hist-len",
     type=int,
     default=1,
     help="Max num conversation turns to use in context",
 )
-parser.add_argument("--gpu", type=int, default=-1, help="Specify GPU device id to use")
+parser.add_argument(
+    "--model", "--pretrained", type=str, default=None, help="Path to model to use"
+)
+parser.add_argument(
+    "--n-candidates", type=int, default=int(1e6), help="Max number of candidates"
+)
+parser.add_argument("--name", type=str, help="Part of name of response output file")
+parser.add_argument("--no-cuda", action="store_true", help="Use CPU only")
+parser.add_argument(
+    "--normalize-cands", action="store_true", help="Normalize encoded candidates"
+)
+parser.add_argument(
+    "--output-folder", type=str, default=None, help="Path to output folder"
+)
+parser.add_argument(
+    "--reactonly",
+    action="store_true",
+    help="EmpatheticDialogues: only consider Listener responses",
+)
+parser.add_argument(
+    "--reddit-cands", action="store_true", help="Include Reddit candidates"
+)
+parser.add_argument("--reddit-folder", type=str, help="Path to Reddit data folder")
+parser.add_argument(
+    "--save-candidates", action="store_true", help="If true, save candidate files"
+)
 parser.add_argument(
     "--task",
     type=str,
@@ -129,12 +129,12 @@ else:
     logger.info("Running on CPU only.")
 if args.fasttext is not None:
     args.max_cand_length += args.fasttext
-net, net_dictionary = load_model(args.model, get_opt(empty=True))
+net, net_dictionary = load_model(args.model, get_opt(existing_opt=args))
 if "bert_tokenizer" in net_dictionary:
     if args.task == "dailydialog":
         raise NotImplementedError("BERT model currently incompatible with DailyDialog!")
 if args.bleu_dict is not None:
-    _, bleu_dictionary = load_model(args.bleu_dict, get_opt(empty=True))
+    _, bleu_dictionary = load_model(args.bleu_dict, get_opt(existing_opt=args))
 else:
     bleu_dictionary = net_dictionary
 paramnum = 0

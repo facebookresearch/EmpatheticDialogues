@@ -12,10 +12,12 @@ import os
 import sys
 
 
-def get_opt(empty=False):
+def get_opt(existing_opt=None):
     parser = get_parser()
-    opt = parser.parse_args() if not empty else parser.parse_args([])
-    set_defaults(opt)
+    opt = parser.parse_args([]) if existing_opt is not None else parser.parse_args()
+    # If we have an existing set of options, just use defaults for our new set. We'll
+    # transfer over needed existing option values below
+    set_defaults(opt=opt, existing_opt=existing_opt)
     return opt
 
 
@@ -188,11 +190,11 @@ def get_parser():
     return parser
 
 
-def set_defaults(opt):
+def set_defaults(opt, existing_opt=None):
     if opt.model_dir is None:
         # retrieval_eval_bleu.py uses an `output_folder` arg instead
-        assert opt.output_folder is not None
-        opt.model_dir = opt.output_folder
+        assert existing_opt.output_folder is not None
+        opt.model_dir = existing_opt.output_folder
 
     # Set model directory
     os.makedirs(opt.model_dir, exist_ok=True)
