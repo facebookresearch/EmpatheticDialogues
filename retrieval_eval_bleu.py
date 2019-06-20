@@ -314,7 +314,7 @@ def embed_candidates(candidates):
     i = 0
     ch = candidates.split(2048, dim=0)
     for chunk in tqdm(range(len(ch))):
-        _, encoded_cand = net(None, None, ch[chunk])
+        _, encoded_cand = net(None, ch[chunk])
         if out_tensor is None:
             out_tensor = torch.FloatTensor(candidates.size(0), encoded_cand.size(1))
             if args.cuda:
