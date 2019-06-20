@@ -112,16 +112,6 @@ def get_parser():
         "--max-sent-len", type=int, default=100, help="Max num tokens per sentence"
     )
     parser.add_argument(
-        "--rm-long-sent",
-        action="store_true",
-        help="Completely remove long Reddit sentences",
-    )
-    parser.add_argument(
-        "--rm-long-contexts",
-        action="store_true",
-        help="Completely remove long Reddit contexts",
-    )
-    parser.add_argument(
         "--model",
         type=str,
         choices=["bert", "transformer"],
@@ -131,6 +121,9 @@ def get_parser():
     parser.add_argument("--model-name", type=str, help="Model save name")
     parser.add_argument(
         "--n-layers", type=int, default=6, help="Num Transformer layers"
+    )
+    parser.add_argument(
+        "--no-shuffle", action="store_true", help="Don't shuffle data during training"
     )
     parser.add_argument(
         "--normalize-emb", action="store_true", help="Normalize loaded embeddings"
@@ -159,13 +152,20 @@ def get_parser():
     )
     parser.add_argument("--reddit-folder", type=str, help="Path to Reddit data folder")
     parser.add_argument(
+        "--rm-long-sent",
+        action="store_true",
+        help="Completely remove long Reddit sentences",
+    )
+    parser.add_argument(
+        "--rm-long-contexts",
+        action="store_true",
+        help="Completely remove long Reddit contexts",
+    )
+    parser.add_argument(
         "--stop-crit-num-epochs",
         type=int,
         default=-1,
         help="Num epochs to stop after if loss is not decreasing",
-    )
-    parser.add_argument(
-        "--no-shuffle", action="store_true", help="Don't shuffle data during training"
     )
     parser.add_argument(
         "--transformer-dim",
