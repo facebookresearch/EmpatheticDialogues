@@ -449,8 +449,8 @@ def get_bleu4(split, history_len=1):
     bleu_dataset = _get_dataset(bleu_dictionary, bleu_parlai_dict)
     sample_index = range(len(bleu_dataset))
     for data_idx in sample_index:
-        net_context, _ = net_dataset[data_idx][:3]
-        bleu_context, bleu_sentence = bleu_dataset[data_idx][:3]
+        net_context, _ = net_dataset[data_idx][:2]
+        bleu_context, bleu_sentence = bleu_dataset[data_idx][:2]
         target_tokens = bleu_sentence
         if args.fasttext is not None:
             target_tokens = target_tokens[args.fasttext :]
