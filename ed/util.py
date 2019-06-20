@@ -22,6 +22,9 @@ def get_opt(empty=False):
 def get_parser():
     parser = argparse.ArgumentParser()
     parser.add_argument(
+        "-bs", "--batch-size", type=int, default=32, help="Training/eval batch size"
+    )
+    parser.add_argument(
         "--bert-add-transformer-layer",
         action="store_true",
         help="Add final Transformer layer to BERT model",
@@ -60,6 +63,28 @@ def get_parser():
         "--empchat-folder", type=str, help="Path to EmpatheticDialogues data folder"
     )
     parser.add_argument(
+        "-e",
+        "--epoch-start",
+        type=int,
+        default=0,
+        help="Initial epoch number when resuming training",
+    )
+    parser.add_argument(
+        "--fasttext",
+        type=int,
+        default=None,
+        help="Number of fastText labels to prepend",
+    )
+    parser.add_argument(
+        "--fasttext-path", type=str, default=None, help="Path to fastText classifier"
+    )
+    parser.add_argument(
+        "--fasttext-type",
+        type=str,
+        default=None,
+        help="Specifies labels of fastText classifier",
+    )
+    parser.add_argument(
         "--hits-at-nb-cands",
         type=int,
         default=100,
@@ -67,6 +92,13 @@ def get_parser():
     )
     parser.add_argument(
         "--learn-embeddings", action="store_true", help="Train on embeddings"
+    )
+    parser.add_argument(
+        "-lr",
+        "--learning-rate",
+        type=float,
+        default=None,
+        help="Training learning rate",
     )
     parser.add_argument("--load-checkpoint", type=str, help="Path to model checkpoint")
     parser.add_argument("--log-file", type=str, help="Path to log file")
@@ -120,6 +152,11 @@ def get_parser():
         "--pretrained", type=str, help="Path to pretrained model (will run eval only)"
     )
     parser.add_argument("--random-seed", type=int, default=92179, help="Seed")
+    parser.add_argument(
+        "--reactonly",
+        action="store_true",
+        help="EmpatheticDialogues: only consider Listener responses",
+    )
     parser.add_argument("--reddit-folder", type=str, help="Path to Reddit data folder")
     parser.add_argument(
         "--stop-crit-num-epochs",
@@ -147,43 +184,6 @@ def get_parser():
         type=int,
         default=8,
         help="Num Transformer attention heads",
-    )
-    parser.add_argument(
-        "-bs", "--batch-size", type=int, default=32, help="Training/eval batch size"
-    )
-    parser.add_argument(
-        "-e",
-        "--epoch-start",
-        type=int,
-        default=0,
-        help="Initial epoch number when resuming training",
-    )
-    parser.add_argument(
-        "-lr",
-        "--learning-rate",
-        type=float,
-        default=None,
-        help="Training learning rate",
-    )
-    parser.add_argument(
-        "--reactonly",
-        action="store_true",
-        help="EmpatheticDialogues: only consider Listener responses",
-    )
-    parser.add_argument(
-        "--fasttext",
-        type=int,
-        default=None,
-        help="Number of fastText labels to prepend",
-    )
-    parser.add_argument(
-        "--fasttext-path", type=str, default=None, help="Path to fastText classifier"
-    )
-    parser.add_argument(
-        "--fasttext-type",
-        type=str,
-        default=None,
-        help="Specifies labels of fastText classifier",
     )
     return parser
 
