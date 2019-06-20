@@ -28,17 +28,6 @@ def create_position_codes(n_pos, dim, out):
     out.requires_grad = False
 
 
-class TransformerResponseWrapper(nn.Module):
-    def __init__(self, transformer, hdim):
-        super(TransformerResponseWrapper, self).__init__()
-        dim = transformer.out_dim
-        self.transformer = transformer
-        self.mlp = nn.Sequential(nn.Linear(dim, hdim), nn.ReLU(), nn.Linear(hdim, dim))
-
-    def forward(self, input_, mask):
-        return self.mlp(self.transformer(input_, mask))
-
-
 class TransformerModel(nn.Module):
     def __init__(
         self,
@@ -221,21 +210,15 @@ class TransformerAdapter(nn.Module):
             use_manual_norm=opt.use_manual_norm,
         )
         dim = self.ctx_transformer.dim
-        hdim = dim * opt.transformer_response_hmul
-        if opt.two_transformers:
-            self.cand_transformer = TransformerModel(
-                opt.transformer_n_heads,
-                opt.n_layers,
-                opt.transformer_dim,
-                len(dictionary),
-                embedding=self.embeddings,
-                dropout=dropout,
-                use_manual_norm=opt.use_manual_norm,
-            )
-        else:
-            self.cand_transformer = TransformerResponseWrapper(
-                self.ctx_transformer, hdim
-            )
+        self.cand_transformer = TransformerModel(
+            opt.transformer_n_heads,
+            opt.n_layers,
+            opt.transformer_dim,
+            len(dictionary),
+            embedding=self.embeddings,
+            dropout=dropout,
+            use_manual_norm=opt.use_manual_norm,
+        )
         self.embeddings = self.ctx_transformer.embeddings
 
     def forward(self, context_w, cands_w):
