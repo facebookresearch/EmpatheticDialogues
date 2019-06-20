@@ -20,9 +20,9 @@ BERT_ID = "bert-base-cased"
 # Used to separate empchat utterances + responses
 UNUSED_BERT_TOKEN_1 = "[unused1]"
 
-# Both of these should actually be unused by this repo if personas are not used, because
-# the first token is set to '__PAD__', which only exists for ParlAI compatibility, and
-# the second token is only used for personas
+# Both of these should actually be unused by this repo, because the first token is set
+# to '__PAD__', which only exists for ParlAI compatibility, and the second token is only
+# used for personas, which are no longer used
 UNUSED_BERT_TOKEN_2 = "[unused2]"
 UNUSED_BERT_TOKEN_3 = "[unused3]"
 

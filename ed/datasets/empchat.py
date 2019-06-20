@@ -15,48 +15,6 @@ from ed.datasets.parlai_dictionary import ParlAIDictionary
 from ed.datasets.tokens import get_bert_token_mapping, tokenize
 
 
-def get_emo(emotion):
-    """
-    simply convert a sentence to a torch tensor.
-    """
-    emod = {
-        "surprised": 0,
-        "excited": 1,
-        "annoyed": 2,
-        "proud": 3,
-        "angry": 4,
-        "sad": 5,
-        "grateful": 6,
-        "lonely": 7,
-        "impressed": 8,
-        "afraid": 9,
-        "disgusted": 10,
-        "confident": 11,
-        "terrified": 12,
-        "hopeful": 13,
-        "anxious": 14,
-        "disappointed": 15,
-        "joyful": 16,
-        "prepared": 17,
-        "guilty": 18,
-        "furious": 19,
-        "nostalgic": 20,
-        "jealous": 21,
-        "anticipating": 22,
-        "embarrassed": 23,
-        "content": 24,
-        "devastated": 25,
-        "sentimental": 26,
-        "caring": 27,
-        "trusting": 28,
-        "ashamed": 29,
-        "apprehensive": 30,
-        "faithful": 31,
-    }
-    temp = torch.LongTensor([[emod[emotion]]])
-    return temp
-
-
 def txt2vec(dic, text, fasttext_type=None):
     if hasattr(dic, "bert_tokenizer"):
         orig_mapping = get_bert_token_mapping(fasttext_type)
@@ -200,12 +158,10 @@ class EmpDataset(Dataset):
                         :maxlen
                     ]
                     if emp_loss is None:
-                        persona = torch.LongTensor([[dic[cparts[2]]]])
                         lbl_min = torch.LongTensor([[dic[sparts[2]]]])
                     else:
-                        persona = get_emo(cparts[2])
                         lbl_min = torch.LongTensor([[dic[sparts[2]]]])
-                    self.data.append((contextt, persona, label, lbl_min))
+                    self.data.append((contextt, label, lbl_min))
                     self.ids.append((sparts[0], sparts[1]))
             else:
                 history = []

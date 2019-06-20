@@ -8,12 +8,11 @@
 import logging
 import os
 import os.path
-import random
 
 import torch
 from torch.utils.data import Dataset
 
-from ed.datasets.tokens import BERT_ID, PAD_TOKEN, START_OF_COMMENT, UNK_TOKEN
+from ed.datasets.tokens import BERT_ID, START_OF_COMMENT, UNK_TOKEN
 
 
 class RedditDataset(Dataset):
@@ -22,7 +21,6 @@ class RedditDataset(Dataset):
         data_folder,
         chunk_id,
         dict_,
-        personas,
         max_len=100,
         rm_long_sent=False,
         max_hist_len=1,
@@ -40,8 +38,6 @@ class RedditDataset(Dataset):
         self.uids = data["uid"]
         self.p2c = data["p2c"]
         self.unk_index = self.dictionary[UNK_TOKEN]
-        self.personas = personas
-        self.default_persona = torch.LongTensor([[self.dictionary[PAD_TOKEN]]])
         if "bert_tokenizer" in dict_:
             self.using_bert = True
             assert BERT_ID == "bert-base-cased"
@@ -97,9 +93,7 @@ class RedditDataset(Dataset):
             hist.reverse()
             context = torch.cat(hist)
         pos = self.get_words(i)
-        uid = int(self.uids[i])
-        persona = self.personas.get(uid, self.default_persona)
-        return context, persona, pos
+        return context, pos
 
     def get_words(self, index, max_length=None):
         if max_length is None:

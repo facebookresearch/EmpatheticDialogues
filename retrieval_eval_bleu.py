@@ -187,7 +187,7 @@ def build_candidates(
         )
         sample_index = range(len(dataset))
         for data_idx in sample_index:
-            _context, _persona, sentence, _ = dataset[data_idx]
+            _context, sentence, _ = dataset[data_idx]
             sent_length = sentence.size(0)
             if torch.sum(sentence == unk_index).gt(0):
                 continue
@@ -215,7 +215,7 @@ def build_candidates(
         )
         sample_index = range(len(dataset))
         for data_idx in sample_index:
-            _context, _persona, sentence = dataset[data_idx]
+            _context, sentence = dataset[data_idx]
             sent_length = sentence.size(0)
             if torch.sum(sentence == unk_index).gt(0):
                 continue
@@ -241,10 +241,10 @@ def build_candidates(
         while i < n_cands:
             chunk += 1
             logging.info(f"Loaded {i} / {n_cands} candidates")
-            dataset = RedditDataset(args.reddit_folder, chunk, net_dictionary, {})
+            dataset = RedditDataset(args.reddit_folder, chunk, net_dictionary)
             sample_index = range(len(dataset))
             for data_idx in sample_index:
-                _context, _persona, sentence = dataset[data_idx]
+                _context, sentence = dataset[data_idx]
                 sent_length = sentence.size(0)
                 if sent_length == 0:
                     print(f"Reddit sentence {data_idx} is of length 0.")
@@ -345,20 +345,16 @@ if args.save_files:
 # ------------------------------------------------------------------------------
 
 
-def predict(persona, context, top_n=5, normalize=False):
+def predict(context, top_n=5, normalize=False):
     """
     returns a list of top_n tuples ("sentence", "score")
     """
     with torch.no_grad():
-        if persona is None:
-            persona = pad([get_token_tensor(PAD_TOKEN)])
-        persona = persona.unsqueeze(0)
         context = context.unsqueeze(0)
         candidates = fixed_candidates
         if args.cuda:
-            persona = persona.cuda(non_blocking=True)
             context = context.cuda(non_blocking=True)
-        ctx, _ = net(context, persona, None, None)
+        ctx, _ = net(context, None)
         scores, index = score_candidates(ctx, cand_embs, top_n, normalize)
         response = []
         outputs = []
@@ -409,7 +405,6 @@ def get_bleu4(split, history_len=1):
                 data_folder=args.reddit_folder,
                 chunk_id=999,
                 dict_=reddit_dict,
-                personas={},
                 max_hist_len=history_len,
                 rm_blank_sentences=True,
             )
@@ -420,13 +415,13 @@ def get_bleu4(split, history_len=1):
     bleu_dataset = _get_dataset(bleu_dictionary, bleu_parlai_dict)
     sample_index = range(len(bleu_dataset))
     for data_idx in sample_index:
-        net_context, net_persona, _ = net_dataset[data_idx][:3]
-        bleu_context, _, bleu_sentence = bleu_dataset[data_idx][:3]
+        net_context, _ = net_dataset[data_idx][:3]
+        bleu_context, bleu_sentence = bleu_dataset[data_idx][:3]
         target_tokens = bleu_sentence
         if args.fasttext is not None:
             target_tokens = target_tokens[args.fasttext :]
         context = bleu_parlai_dict.vec2txt(bleu_context.numpy().tolist())
-        responses, sources = predict(None, net_context)
+        responses, sources = predict(net_context)
         response = responses[0][0]
         source = sources[0]
         if source == "Reddit":

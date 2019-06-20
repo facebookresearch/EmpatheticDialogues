@@ -30,10 +30,10 @@ def get_parser():
         type=str,
         default="reddit",
         choices=["reddit", "empchat", "dailydialog"],
+        help='Data to train/eval on'
     )
-    parser.add_argument("--dict-max-words", type=int, default=250000)
-    parser.add_argument("--display-iter", type=int, default=250)
-    parser.add_argument("--emptypersona", action="store_true")
+    parser.add_argument("--dict-max-words", type=int, default=250000, help='Max dictionary size (not used with BERT)')
+    parser.add_argument("--display-iter", type=int, default=250, help='Frequency of train logging')
     parser.add_argument("--embeddings", type=str)
     parser.add_argument("--embeddings-size", type=int, default=300)
     parser.add_argument("--empchat-folder", type=str)
@@ -44,8 +44,6 @@ def get_parser():
     parser.add_argument("--learn-embeddings", action="store_true")
     parser.add_argument("--load-checkpoint", type=str)
     parser.add_argument("--log-file", type=str)
-    parser.add_argument("--lowercase-personas", action="store_true")
-    parser.add_argument("--max-personas", type=int, default=20)
     parser.add_argument("--max-hist-len", type=int, default=1)
     parser.add_argument("--max-sent-len", type=int, default=100)
     parser.add_argument("--rm-long-sent", action="store_true")
@@ -61,7 +59,6 @@ def get_parser():
     parser.add_argument(
         "--optimizer", type=str, choices=["sgd", "adamax"], default="adamax"
     )
-    parser.add_argument("--personas", type=str)
     parser.add_argument("--pretrained", type=str)
     parser.add_argument("--random-seed", type=int, default=92179)
     parser.add_argument("--reddit-folder", type=str)
@@ -72,7 +69,6 @@ def get_parser():
     parser.add_argument("--transformer-n-heads", type=int, default=8)
     parser.add_argument("--transformer-response-hmul", type=int, default=1)
     parser.add_argument("--two-transformers", action="store_true")
-    parser.add_argument("--use-personas", action="store_true")
     parser.add_argument("--use-manual-norm", action="store_true")
     parser.add_argument("-bs", "--batch-size", type=int, default=32)
     parser.add_argument("-e", "--epoch-start", type=int, default=0)

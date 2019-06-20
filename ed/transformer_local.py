@@ -238,7 +238,7 @@ class TransformerAdapter(nn.Module):
             )
         self.embeddings = self.ctx_transformer.embeddings
 
-    def forward(self, context_w, personas_w, cands_w):
+    def forward(self, context_w, cands_w):
         if context_w is not None:
             context_mask = context_w != self.pad_idx
             context_h = self.ctx_transformer(context_w, context_mask)

@@ -253,7 +253,6 @@ def main(opt_):
         net, dictionary = load_model(opt_.pretrained, opt_)
         net.opt.dataset_name = opt_.dataset_name
         net.opt.reddit_folder = opt_.reddit_folder
-        net.opt.personas = opt_.personas
         net.opt.reactonly = opt_.reactonly
         net.opt.max_hist_len = opt_.max_hist_len
         net.opt.emp_loss = None

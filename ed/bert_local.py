@@ -61,7 +61,7 @@ class BertAdapter(nn.Module):
         self.ctx_bert.bert_model.embeddings.word_embeddings.weight.detach_()
         self.cand_bert.bert_model.embeddings.word_embeddings.weight.detach_()
 
-    def forward(self, context_w, personas_w, cands_w):
+    def forward(self, context_w, cands_w):
         if context_w is not None:
             context_segments = torch.zeros_like(context_w)
             context_mask = context_w != self.pad_idx

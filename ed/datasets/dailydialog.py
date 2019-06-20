@@ -65,8 +65,7 @@ class DDDataset(Dataset):
             prev_str = " <s> ".join(history[-self.max_hist_len :])
             contextt = sentence_to_tensor(dic, prev_str)[:maxlen]
             label = sentence_to_tensor(dic, sent)[:maxlen]
-            persona = torch.LongTensor([[dic[row["emo"]]]])
-            self.data.append((contextt, persona, label))
+            self.data.append((contextt, label))
 
     def __len__(self):
         return len(self.data)

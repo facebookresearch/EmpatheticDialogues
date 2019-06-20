@@ -116,7 +116,6 @@ class TrainEnvironment:
                 self.dict["iwords"].append(EMPTYPERSONA_TOKEN)
                 self.dict["words"] = {w: i for i, w in enumerate(self.dict["iwords"])}
             dict_words = self.dict["words"]
-            self.personas = load_personas(opt, dict_words) if opt.use_personas else {}
         else:
             raise ValueError("Dataset name unrecognized!")
         self.pad_idx = self.dict["words"][PAD_TOKEN]
@@ -126,7 +125,6 @@ class TrainEnvironment:
             self.opt.reddit_folder,
             chunk_id,
             self.dict,
-            self.personas,
             max_len=self.opt.max_sent_len,
             rm_long_sent=self.opt.rm_long_sent,
             max_hist_len=self.opt.max_hist_len,
@@ -211,10 +209,9 @@ class TrainEnvironment:
         endtoken = None if not self.opt.generate else self.dict["words"][END_OF_COMMENT]
         contexts, next_ = [
             pad(ex, self.pad_idx, gen=starttoken, endgen=endtoken)
-            for ex in [input_list[0], input_list[2]]
+            for ex in [input_list[0], input_list[1]]
         ]
-        personas = pad(input_list[1], self.pad_idx)
-        return contexts, personas, next_
+        return contexts, next_
 
     def to_words(self, tensor):
         return " ".join(self.dict["iwords"][x] for x in tensor.tolist())
@@ -254,61 +251,3 @@ def pad(tensors, padding_value=-1, gen=None, endgen=None):
         return out
     else:
         raise ValueError('Input tensors must be either 1D or 2D!')
-
-
-def split_persona_line(line, dictionary, max_n_personas):
-    sentences_for_uid = []
-    current_sentence = []
-    words = line.rstrip().split()
-    for w in words:
-        current_sentence.append(dictionary.get(w, 0))
-        if w in {".", "!", "?"}:
-            sentences_for_uid.append(current_sentence)
-            current_sentence = []
-            if len(sentences_for_uid) == max_n_personas:
-                return sentences_for_uid
-    if len(current_sentence) > 0:
-        sentences_for_uid.append(current_sentence)
-    return sentences_for_uid
-
-
-def load_personas(opt, dictionary, split_sentences=True):
-    logging.info(f"Loading personas from {opt.personas}")
-    if "encoded" in opt.personas:
-        return torch.load(opt.personas)
-    uid2personas = {}
-    max_n_personas = opt.max_personas
-    with open(opt.personas, "r") as f:
-        for line in tqdm.tqdm(f, desc='Looping over personas'):
-            if hasattr(opt, "lowercase_personas") and opt.lowercase_personas:
-                line = line.lower()
-            uid, personas = line.split(",", 1)
-            if split_sentences:
-                sentences_for_uid = split_persona_line(line, dictionary, max_n_personas)
-                if len(sentences_for_uid) == 0:
-                    continue
-                tensor_length = max(len(sentence) for sentence in sentences_for_uid)
-                persona_w = torch.LongTensor(
-                    len(sentences_for_uid), tensor_length
-                ).fill_(dictionary[PAD_TOKEN])
-                for i, sentence in enumerate(sentences_for_uid):
-                    persona_w[i, : len(sentence)] = torch.LongTensor(sentence)
-                if "emptypersona" in opt and opt.emptypersona:
-                    emptypersona = torch.LongTensor(1, tensor_length).fill_(
-                        dictionary[PAD_TOKEN]
-                    )
-                    emptypersona[0] = dictionary[EMPTYPERSONA_TOKEN]
-                    persona_w = torch.cat([emptypersona, persona_w])
-            else:
-                persona_w = torch.LongTensor(
-                    [dictionary.get(w, 0) for w in personas.rstrip().split()]
-                )
-            uid2personas[int(uid)] = persona_w
-            if opt.fast_debug and len(uid2personas) > 1000:
-                break
-    logging.info(f"n personas: {len(uid2personas)}")
-    persona_string = opt.personas.split("/")[-1]
-    dumpfn = f"../dumps/encoded-{persona_string}"
-    logging.info(f"dumping encoded personas to {dumpfn}")
-    torch.save(uid2personas, dumpfn)
-    return uid2personas
