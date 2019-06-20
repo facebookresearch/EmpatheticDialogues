@@ -203,8 +203,7 @@ class TrainEnvironment:
     def batchify(self, batch):
         input_list = list(zip(*batch))
         contexts, next_ = [
-            pad(ex, self.pad_idx)
-            for ex in [input_list[0], input_list[1]]
+            pad(ex, self.pad_idx) for ex in [input_list[0], input_list[1]]
         ]
         return contexts, next_
 
@@ -229,4 +228,4 @@ def pad(tensors, padding_value=-1):
             out[i, : t.size(0), : t.size(1)] = t
         return out
     else:
-        raise ValueError('Input tensors must be either 1D or 2D!')
+        raise ValueError("Input tensors must be either 1D or 2D!")

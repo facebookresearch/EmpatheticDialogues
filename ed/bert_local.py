@@ -20,6 +20,7 @@ from ed.datasets.tokens import (
 class BertAdapter(nn.Module):
     def __init__(self, opt, dictionary):
         from parlai.agents.bert_ranker.helpers import BertWrapper
+
         try:
             from pytorch_pretrained_bert import BertModel
         except ImportError:

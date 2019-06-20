@@ -9,25 +9,25 @@ from setuptools import setup, find_packages
 import sys
 
 if sys.version_info < (3, 6):
-    sys.exit('Sorry, Python >=3.6 is required for EmpatheticDialogues.')
+    sys.exit("Sorry, Python >=3.6 is required for EmpatheticDialogues.")
 
-with open('README.md', encoding="utf8") as f:
+with open("README.md", encoding="utf8") as f:
     readme = f.read()
 
-with open('LICENSE') as f:
+with open("LICENSE") as f:
     license_ = f.read()
 
 setup(
-    name='ed',
-    version='0.1.0',
+    name="ed",
+    version="0.1.0",
     description=(
-        'PyTorch original implementation of Towards Empathetic Open-domain '
-        'Conversation Models: a New Benchmark and Dataset '
-        '(https://arxiv.org/abs/1811.00207).'
+        "PyTorch original implementation of Towards Empathetic Open-domain "
+        "Conversation Models: a New Benchmark and Dataset "
+        "(https://arxiv.org/abs/1811.00207)."
     ),
     long_description=readme,
-    url='https://arxiv.org/abs/1811.00207',
+    url="https://arxiv.org/abs/1811.00207",
     license=license_,
-    python_requires='>=3.6',
+    python_requires=">=3.6",
     packages=find_packages(),
 )

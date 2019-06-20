@@ -54,7 +54,9 @@ def train(epoch, start_time, model, optimizer, opt_, data_loader):
     # Run one epoch
     for idx, ex in enumerate(data_loader, 1):
         params = [
-            field.cuda(non_blocking=True) if opt_.cuda else field
+            field.cuda(non_blocking=True)
+            if opt_.cuda
+            else field
             if field is not None
             else None
             for field in ex
@@ -107,7 +109,9 @@ def validate(
             n_skipped += batch_size
             continue
         params = [
-            field.cuda(non_blocking=True) if opt.cuda else field
+            field.cuda(non_blocking=True)
+            if opt.cuda
+            else field
             if field is not None
             else None
             for field in ex
@@ -178,8 +182,7 @@ def train_model(opt_):
     if opt_.optimizer == "adamax":
         lr = opt_.learning_rate or 0.002
         named_params_to_optimize = filter(
-            lambda p: p[1].requires_grad,
-            net.named_parameters(),
+            lambda p: p[1].requires_grad, net.named_parameters()
         )
         params_to_optimize = (p[1] for p in named_params_to_optimize)
         optimizer = optim.Adamax(params_to_optimize, lr=lr)

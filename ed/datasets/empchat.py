@@ -86,6 +86,7 @@ class EmpDataset(Dataset):
         self.max_hist_len = history_len
         if fasttext is not None:
             import fastText
+
             assert fasttext_type is not None and fasttext_path is not None
             self.ftmodel = fastText.FastText.load_model(fasttext_path)
             newmaxlen += fasttext

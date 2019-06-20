@@ -60,7 +60,9 @@ parser.add_argument(
 parser.add_argument(
     "--n-candidates", type=int, default=int(1e6), help="Max number of candidates"
 )
-parser.add_argument("--normalize-cands", action="store_true", help="Normalize encoded candidates")
+parser.add_argument(
+    "--normalize-cands", action="store_true", help="Normalize encoded candidates"
+)
 parser.add_argument(
     "--max-cand-length",
     type=int,
@@ -68,20 +70,56 @@ parser.add_argument(
     help="Max candidate length in number of tokens",
 )
 parser.add_argument("--no-cuda", action="store_true", help="Use CPU only")
-parser.add_argument("--name", type=str, help='Part of name of response output file')
-parser.add_argument("--fasttext", type=int, default=None, help='Number of fastText labels to prepend')
-parser.add_argument("--fasttext-path", type=str, default=None, help='Path to fastText classifier')
-parser.add_argument("--fasttext-type", type=str, default=None, help='Specifies labels of fastText classifier')
-parser.add_argument("--reactonly", action="store_true", help='EmpatheticDialogues: only consider Listener responses')
-parser.add_argument("--dailydialog-cands", action="store_true", help="Include DailyDialog candidates")
-parser.add_argument("--empchat-cands", action="store_true", help="Include EmpatheticDialogues candidates")
-parser.add_argument("--reddit-cands", action="store_true", help="Include Reddit candidates")
-parser.add_argument("--dailydialog-folder", type=str, help="Path to DailyDialog data folder")
-parser.add_argument("--empchat-folder", type=str, help="Path to EmpatheticDialogues data folder")
+parser.add_argument("--name", type=str, help="Part of name of response output file")
+parser.add_argument(
+    "--fasttext", type=int, default=None, help="Number of fastText labels to prepend"
+)
+parser.add_argument(
+    "--fasttext-path", type=str, default=None, help="Path to fastText classifier"
+)
+parser.add_argument(
+    "--fasttext-type",
+    type=str,
+    default=None,
+    help="Specifies labels of fastText classifier",
+)
+parser.add_argument(
+    "--reactonly",
+    action="store_true",
+    help="EmpatheticDialogues: only consider Listener responses",
+)
+parser.add_argument(
+    "--dailydialog-cands", action="store_true", help="Include DailyDialog candidates"
+)
+parser.add_argument(
+    "--empchat-cands",
+    action="store_true",
+    help="Include EmpatheticDialogues candidates",
+)
+parser.add_argument(
+    "--reddit-cands", action="store_true", help="Include Reddit candidates"
+)
+parser.add_argument(
+    "--dailydialog-folder", type=str, help="Path to DailyDialog data folder"
+)
+parser.add_argument(
+    "--empchat-folder", type=str, help="Path to EmpatheticDialogues data folder"
+)
 parser.add_argument("--reddit-folder", type=str, help="Path to Reddit data folder")
-parser.add_argument("--max-hist-len", type=int, default=1, help="Max num conversation turns to use in context")
+parser.add_argument(
+    "--max-hist-len",
+    type=int,
+    default=1,
+    help="Max num conversation turns to use in context",
+)
 parser.add_argument("--gpu", type=int, default=-1, help="Specify GPU device id to use")
-parser.add_argument("--task", type=str, choices=["dailydialog", "empchat", "reddit"], default="empchat", help="Dataset for context/target-response pairs")
+parser.add_argument(
+    "--task",
+    type=str,
+    choices=["dailydialog", "empchat", "reddit"],
+    default="empchat",
+    help="Dataset for context/target-response pairs",
+)
 args = parser.parse_args()
 args.cuda = not args.no_cuda and torch.cuda.is_available()
 if args.cuda:
@@ -94,9 +132,7 @@ if args.fasttext is not None:
 net, net_dictionary = load_model(args.model, get_opt(empty=True))
 if "bert_tokenizer" in net_dictionary:
     if args.task == "dailydialog":
-        raise NotImplementedError(
-            "BERT model currently incompatible with DailyDialog!"
-        )
+        raise NotImplementedError("BERT model currently incompatible with DailyDialog!")
 if args.bleu_dict is not None:
     _, bleu_dictionary = load_model(args.bleu_dict, get_opt(empty=True))
 else:
@@ -210,9 +246,7 @@ def build_candidates(
     breakpoint_ = i
     actual_ct[1] = i
     if args.dailydialog_cands:
-        dataset = DDDataset(
-            "train", parlai_dict, data_folder=args.dailydialog_folder
-        )
+        dataset = DDDataset("train", parlai_dict, data_folder=args.dailydialog_folder)
         sample_index = range(len(dataset))
         for data_idx in sample_index:
             _context, sentence = dataset[data_idx]
