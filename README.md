@@ -1,6 +1,6 @@
 # EmpatheticDialogues
 
-PyTorch original implementation of Towards Empathetic Open-domain Conversation Models: a New Benchmark and Dataset (https://arxiv.org/pdf/1811.00207.pdf).
+PyTorch original implementation of Towards Empathetic Open-domain Conversation Models: a New Benchmark and Dataset (https://arxiv.org/abs/1811.00207).
 
 ## Dependencies
 
@@ -42,11 +42,11 @@ wget https://dl.fbaipublicfiles.com/parlai/empatheticdialogues/empatheticdialogu
 
 ## References
 
-Please cite [[1]](https://arxiv.org/pdf/1811.00207.pdf) if you found the resources in this repository useful.
+Please cite [[1]](https://arxiv.org/abs/1811.00207) if you found the resources in this repository useful.
 
 ### Towards Empathetic Open-domain Conversation Models: a New Benchmark and Dataset
 
-[1] H. Rashkin, E. M. Smith, M. Li, Y. Boureau [*Towards Empathetic Open-domain Conversation Models: a New Benchmark and Dataset*](https://arxiv.org/pdf/1811.00207.pdf)
+[1] H. Rashkin, E. M. Smith, M. Li, Y. Boureau [*Towards Empathetic Open-domain Conversation Models: a New Benchmark and Dataset*](https://arxiv.org/abs/1811.00207)
 
 ```
 @inproceedings{rashkin2019towards,
