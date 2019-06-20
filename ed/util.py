@@ -189,6 +189,11 @@ def get_parser():
 
 
 def set_defaults(opt):
+    if opt.model_dir is None:
+        # retrieval_eval_bleu.py uses an `output_folder` arg instead
+        assert opt.output_folder is not None
+        opt.model_dir = opt.output_folder
+
     # Set model directory
     os.makedirs(opt.model_dir, exist_ok=True)
 

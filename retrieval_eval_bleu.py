@@ -49,10 +49,10 @@ parser.add_argument(
     ),
 )
 parser.add_argument(
-    "--save-files",
-    type=str,
-    default=None,
-    help="Path to folder where we should save candidate files to use",
+    "--save-candidates", action="store_true", help="If true, save candidate files"
+)
+parser.add_argument(
+    "--output-folder", type=str, default=None, help="Path to output folder"
 )
 parser.add_argument(
     "--candidates", type=str, default=None, help="Path to candidates to use"
@@ -359,14 +359,14 @@ logging.warning("Embedding candidates")
 with torch.no_grad():
     cand_embs = embed_candidates(fixed_candidates)
 logging.warning("Done with candidates")
-if args.save_files:
-    cand_path = os.path.join(args.save_files, "reddit_cands_tokens.bin")
+if args.save_candidates:
+    cand_path = os.path.join(args.output_folder, "reddit_cands_tokens.bin")
     logging.warning(f"Saving candidates in {cand_path}")
     torch.save(fixed_candidates, cand_path)
-    emb_path = os.path.join(args.save_files, "reddit_cands.bin")
+    emb_path = os.path.join(args.output_folder, "reddit_cands.bin")
     logging.warning(f"Saving candidate embs in {emb_path}")
     torch.save(cand_embs, emb_path)
-    txt_path = os.path.join(args.save_files, "reddit_cands.txt")
+    txt_path = os.path.join(args.output_folder, "reddit_cands.txt")
     logging.warning(f"Saving candidate texts in {txt_path}")
     with open(txt_path, "w") as f:
         for candidate in fixed_candidates:
