@@ -84,10 +84,10 @@ class RedditDataset(Dataset):
         hist = []
         parent_index = self.p2c[i]
         if self.max_hist_len <= 1:
-            context = self.get_words(parent_index, self.max_len)
+            context = self.get_words(parent_index)
         else:
             while len(hist) < 2 * self.max_hist_len and parent_index != -1:
-                hist.append(self.get_words(parent_index, self.max_len))
+                hist.append(self.get_words(parent_index))
                 hist.append(self.start_of_comment)
                 parent_index = self.p2c[parent_index]
             hist.reverse()
@@ -95,11 +95,9 @@ class RedditDataset(Dataset):
         pos = self.get_words(i)
         return context, pos
 
-    def get_words(self, index, max_length=None):
-        if max_length is None:
-            max_length = self.max_len
+    def get_words(self, index):
         start = self.starts[index]
-        end = min(self.ends[index], start + max_length)
+        end = min(self.ends[index], start + self.max_len)
         selected_words = self.words[start:end]
         if self.using_bert:
             return selected_words

@@ -168,7 +168,7 @@ def train_model(opt_):
     paramnum = 0
     trainable = 0
     for name, parameter in net.named_parameters():
-        if parameter.requires_grad and _optimize_param(name, opt_):
+        if parameter.requires_grad:
             trainable += parameter.numel()
         paramnum += parameter.numel()
     print("TRAINABLE", paramnum, trainable)
@@ -178,7 +178,7 @@ def train_model(opt_):
     if opt_.optimizer == "adamax":
         lr = opt_.learning_rate or 0.002
         named_params_to_optimize = filter(
-            lambda p: p[1].requires_grad and _optimize_param(p[0], opt_),
+            lambda p: p[1].requires_grad,
             net.named_parameters(),
         )
         params_to_optimize = (p[1] for p in named_params_to_optimize)
@@ -242,10 +242,6 @@ def train_model(opt_):
                 if epoch - best_loss_epoch >= opt_.stop_crit_num_epochs:
                     break
     return net, dictionary
-
-
-def _optimize_param(p, opt_):
-    return not opt_.opt_additional_only or "additional" in p
 
 
 def main(opt_):
