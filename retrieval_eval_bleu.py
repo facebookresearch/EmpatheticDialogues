@@ -68,20 +68,20 @@ parser.add_argument(
     help="Max candidate length in number of tokens",
 )
 parser.add_argument("--no-cuda", action="store_true", help="Use CPU only")
-parser.add_argument("--name", type=str)
-parser.add_argument("--fasttext", type=int, default=None)
-parser.add_argument("--fasttext-type", type=str, default=None)
-parser.add_argument("--fasttext-path", type=str, default=None)
-parser.add_argument("--reactonly", action="store_true")
-parser.add_argument("--dd", action="store_true")
-parser.add_argument("--ec", action="store_true")
-parser.add_argument("--reddit", action="store_true")
+parser.add_argument("--name", type=str, help='Part of name of response output file')
+parser.add_argument("--fasttext", type=int, default=None, help='Number of fastText labels to prepend')
+parser.add_argument("--fasttext-type", type=str, default=None, help='Specifies labels of fastText classifier')
+parser.add_argument("--fasttext-path", type=str, default=None, help='Path to fastText classifier')
+parser.add_argument("--reactonly", action="store_true", help='Only consider Listener responses')
+parser.add_argument("--dailydialog-cands", action="store_true")
+parser.add_argument("--empchat-cands", action="store_true")
+parser.add_argument("--reddit-cands", action="store_true")
 parser.add_argument("--dailydialog-folder", type=str)
 parser.add_argument("--empchat-folder", type=str)
 parser.add_argument("--reddit-folder", type=str)
 parser.add_argument("--max-hist-len", type=int, default=1)
 parser.add_argument("--gpu", type=int, default=-1, help="Specify GPU device id to use")
-parser.add_argument("--task", type=str, default="ec")
+parser.add_argument("--task", type=str, choices=["dailydialog", "empchat", "reddit"], default="empchat")
 args = parser.parse_args()
 args.cuda = not args.no_cuda and torch.cuda.is_available()
 if args.cuda:
@@ -93,9 +93,9 @@ if args.fasttext is not None:
     args.max_cand_length += args.fasttext
 net, net_dictionary = load_model(args.model, get_opt(empty=True))
 if "bert_tokenizer" in net_dictionary:
-    if args.task == "dd":
+    if args.task == "dailydialog":
         raise NotImplementedError(
-            "BERT model currently incompatible with DailyDialogues!"
+            "BERT model currently incompatible with DailyDialog!"
         )
 if args.bleu_dict is not None:
     _, bleu_dictionary = load_model(args.bleu_dict, get_opt(empty=True))
@@ -175,7 +175,7 @@ def build_candidates(
             return sentence_[0].item == gt_index
 
     parlai_dict = ParlAIDictionary.create_from_reddit_style(net_dictionary)
-    if args.ec:
+    if args.empchat_cands:
         dataset = EmpDataset(
             "train",
             parlai_dict,
@@ -209,7 +209,7 @@ def build_candidates(
                     break
     breakpoint_ = i
     actual_ct[1] = i
-    if args.dd:
+    if args.dailydialog_cands:
         dataset = DDDataset(
             "train", parlai_dict, data_folder=args.dailydialog_folder, reactonly=False
         )
@@ -237,7 +237,7 @@ def build_candidates(
                     break
     bp2 = i
     actual_ct[2] = i - breakpoint_
-    if args.reddit:
+    if args.reddit_cands:
         while i < n_cands:
             chunk += 1
             logging.info(f"Loaded {i} / {n_cands} candidates")
@@ -367,7 +367,7 @@ def predict(persona, context, top_n=5, normalize=False):
             if index < breakingpt:
                 outputs.append("EmpChat")
             elif index < breakingpt2:
-                outputs.append("DailyDialogue")
+                outputs.append("DailyDialog")
             else:
                 outputs.append("Reddit")
         return response, outputs
@@ -375,7 +375,7 @@ def predict(persona, context, top_n=5, normalize=False):
 
 def get_bleu4(split, history_len=1):
     """
-    Allows to discuss with the bot a bit faster.
+    Print BLEU scores and output contexts and retrieved responses.
     """
     if history_len < 1:
         history_len = 1
@@ -386,14 +386,14 @@ def get_bleu4(split, history_len=1):
     outf = open("retrieved_split_" + args.name + "_" + split + ".txt", "w")
 
     def _get_dataset(reddit_dict, parlai_dict):
-        if args.task == "dd":
+        if args.task == "dailydialog":
             return DDDataset(
                 split,
                 parlai_dict,
                 data_folder=args.dailydialog_folder,
                 history_len=history_len,
             )
-        elif args.task == "ec":
+        elif args.task == "empchat":
             return EmpDataset(
                 split,
                 parlai_dict,
@@ -435,7 +435,7 @@ def get_bleu4(split, history_len=1):
             source_ct[1] += 1
         else:
             source_ct[2] += 1
-        if args.task == "ec":
+        if args.task == "empchat":
             cid, sid = bleu_dataset.getid(data_idx)
         else:
             cid = sid = -1
@@ -444,8 +444,8 @@ def get_bleu4(split, history_len=1):
             response = " ".join(response.split()[args.fasttext :])
         outf.write("\t".join([str(cid), str(sid), context, response, source]) + "\n")
         hypo_tokens = torch.IntTensor(bleu_parlai_dict.txt2vec(response))
-        # Use this tokenization even if a BERT tokenizer exists, to match the
-        # BLEU calculation when not using BERT
+        # Use this tokenization even if a BERT tokenizer exists, to match the BLEU
+        # calculation when not using BERT
         scorer.add(target_tokens.type(torch.IntTensor), hypo_tokens)
     print(scorer.result_string(order=1))
     print(scorer.result_string(order=2))
