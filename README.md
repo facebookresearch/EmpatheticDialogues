@@ -99,7 +99,7 @@ python retrieval_train.py \
 --transformer-dim 300 \
 --transformer-n-heads 6
 
-# Self-BLEU
+# Self-BLEU (EmpatheticDialogues context/candidates)
 python retrieval_eval_bleu.py \
 --empchat-cands \
 --empchat-folder ${EMPATHETIC_DIALOGUES_DATA_FOLDER} \
@@ -115,9 +115,28 @@ python retrieval_eval_bleu.py \
 
 #### Pretraining
 
-[ADD: R cands]
+```
+python {REPO_FOLDER}/retrieval_train.py \
+--batch-size {batch_size:d} \
+--bert-dim 300 \
+--cuda \
+--dataset-name reddit \
+--dict-max-words 250000 \
+--display-iter 100 \
+--embeddings None \
+--empchat-folder {empchat_folder} \
+--learning-rate 6e-5 \
+--model bert \
+--model-dir {save_folder} \
+--model-name model \
+--num-epochs 10000 \
+--optimizer adamax \
+--reddit-folder {REDDIT_BERT_FOLDER}
+```
 
-[ADD: ED cands]
+[ADD: eval on R cands]
+
+[ADD: eval on ED cands]
 
 #### Fine-tuning
 
@@ -163,7 +182,7 @@ python retrieval_train.py \
 --pretrained ${TRAIN_SAVE_FOLDER}/model.mdl \
 --reactonly
 
-# Self-BLEU
+# Self-BLEU (EmpatheticDialogues context/candidates)
 python retrieval_eval_bleu.py \
 --bleu-dict ${PATH_TO_MODEL_WITH_TRANSFORMER_DICT} \
 --empchat-cands \
