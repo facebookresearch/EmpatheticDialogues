@@ -87,7 +87,6 @@ python retrieval_train.py \
 --dict-max-words 250000 \
 --display-iter 250 \
 --empchat-folder ${EMPATHETIC_DIALOGUES_DATA_FOLDER} \
---learning-rate 8e-4 \
 --max-hist-len 4 \
 --model transformer \
 --model-dir ${EVAL_SAVE_FOLDER} \
@@ -135,35 +134,37 @@ python retrieval_train.py \
 --reddit-folder ${BERT_TOKENIZED_REDDIT_DATA_FOLDER}
 
 # P@1,100
-python {REPO_FOLDER}/retrieval_train.py \
---batch-size {batch_size:d} \
+python retrieval_train.py \
+--batch-size 256 \
 --bert-dim 300 \
 --cuda \
 --dataset-name empchat \
 --dict-max-words 250000 \
 --display-iter 100 \
 --embeddings None \
---empchat-folder {empchat_folder} \
---learning-rate 6e-5 \
+--empchat-folder ${EMPATHETIC_DIALOGUES_DATA_FOLDER} \
 --max-hist-len 4 \
 --model bert \
---model-dir {save_folder} \
+--model-dir ${EVAL_SAVE_FOLDER} \
 --model-name model \
 --optimizer adamax \
---pretrained {pretrained_path} \
+--pretrained ${TRAIN_SAVE_FOLDER}/model.mdl \
 --reactonly
 
 # Self-BLEU (EmpatheticDialogues context/candidates)
-python {REPO_FOLDER}/retrieval_eval_bleu.py \
---bleu-dict {HANNAHS_TRANSFORMER_PRETRAINED_PATH} \
---empchat-folder {empchat_folder} \
+python retrieval_eval_bleu.py \
+--bleu-dict ${PATH_TO_MODEL_WITH_TRANSFORMER_DICT} \
+--empchat-cands \
+--empchat-folder ${EMPATHETIC_DIALOGUES_DATA_FOLDER} \
 --max-hist-len 4 \
---model {pretrained_path} \
+--model ${TRAIN_SAVE_FOLDER}/model.mdl \
 --name model \
---output-folder {save_folder} \
+--output-folder ${EVAL_SAVE_FOLDER} \
 --reactonly \
-{bleu_flags}
+--task empchat
 ```
+
+Note: we pass in a separate dictionary (`--bleu-dict`) when calculating the self-BLEU of BERT models in order to match tokenization between Transformer and BERT models.
 
 #### Fine-tuning
 
@@ -200,7 +201,6 @@ python retrieval_train.py \
 --display-iter 100 \
 --embeddings None \
 --empchat-folder ${EMPATHETIC_DIALOGUES_DATA_FOLDER} \
---learning-rate 1e-5 \
 --max-hist-len 4 \
 --model bert \
 --model-dir ${EVAL_SAVE_FOLDER} \
