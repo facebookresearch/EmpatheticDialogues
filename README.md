@@ -116,6 +116,7 @@ python retrieval_eval_bleu.py \
 #### Pretraining
 
 ```
+# Training
 python retrieval_train.py \
 --batch-size 256 \
 --bert-dim 300 \
@@ -132,11 +133,37 @@ python retrieval_train.py \
 --num-epochs 10000 \
 --optimizer adamax \
 --reddit-folder ${BERT_TOKENIZED_REDDIT_DATA_FOLDER}
+
+# P@1,100
+python {REPO_FOLDER}/retrieval_train.py \
+--batch-size {batch_size:d} \
+--bert-dim 300 \
+--cuda \
+--dataset-name empchat \
+--dict-max-words 250000 \
+--display-iter 100 \
+--embeddings None \
+--empchat-folder {empchat_folder} \
+--learning-rate 6e-5 \
+--max-hist-len 4 \
+--model bert \
+--model-dir {save_folder} \
+--model-name model \
+--optimizer adamax \
+--pretrained {pretrained_path} \
+--reactonly
+
+# Self-BLEU (EmpatheticDialogues context/candidates)
+python {REPO_FOLDER}/retrieval_eval_bleu.py \
+--bleu-dict {HANNAHS_TRANSFORMER_PRETRAINED_PATH} \
+--empchat-folder {empchat_folder} \
+--max-hist-len 4 \
+--model {pretrained_path} \
+--name model \
+--output-folder {save_folder} \
+--reactonly \
+{bleu_flags}
 ```
-
-[ADD: eval on R cands]
-
-[ADD: eval on ED cands]
 
 #### Fine-tuning
 
