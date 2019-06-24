@@ -115,9 +115,9 @@ python retrieval_eval_bleu.py \
 
 #### Pretraining
 
-[ADD: R cands (once completed)]
+[ADD: R cands]
 
-[ADD: ED cands (once completed)]
+[ADD: ED cands]
 
 #### Fine-tuning
 
@@ -133,17 +133,16 @@ python retrieval_train.py \
 --dict-max-words 250000 \
 --display-iter 100 \
 --embeddings None \
---empchat-folder {empchat_folder} \
+--empchat-folder ${EMPATHETIC_DIALOGUES_DATA_FOLDER} \
 --learning-rate 1e-5 \
---load-checkpoint {BERT_PRETRAINED_PATH} \
+--load-checkpoint ${PRETRAINED_MODEL_PATH} \
 --max-hist-len 4 \
 --model bert \
---model-dir {finetune_folder} \
+--model-dir ${TRAIN_SAVE_FOLDER} \
 --model-name model \
 --num-epochs 100 \
 --optimizer adamax \
---stop-crit-num-epochs 10 \
-{additional_flags}
+--stop-crit-num-epochs 10
 
 # P@1,100
 python retrieval_train.py \
@@ -154,33 +153,34 @@ python retrieval_train.py \
 --dict-max-words 250000 \
 --display-iter 100 \
 --embeddings None \
---empchat-folder {empchat_folder} \
+--empchat-folder ${EMPATHETIC_DIALOGUES_DATA_FOLDER} \
 --learning-rate 1e-5 \
 --max-hist-len 4 \
 --model bert \
---model-dir {eval_folder} \
+--model-dir ${EVAL_SAVE_FOLDER} \
 --model-name model \
 --optimizer adamax \
---pretrained {finetune_folder}/model.mdl \
---reactonly \
-{additional_flags}
+--pretrained ${TRAIN_SAVE_FOLDER}/model.mdl \
+--reactonly
 
 # Self-BLEU
 python retrieval_eval_bleu.py \
---bleu-dict {HANNAHS_TRANSFORMER_PRETRAINED_PATH} \
+--bleu-dict ${PATH_TO_MODEL_WITH_TRANSFORMER_DICT} \
 --empchat-cands \
---empchat-folder {empchat_folder} \
+--empchat-folder ${EMPATHETIC_DIALOGUES_DATA_FOLDER} \
 --max-hist-len 4 \
---model {finetune_folder}/model.mdl \
+--model ${TRAIN_SAVE_FOLDER}/model.mdl \
 --name model \
---output-folder {eval_folder} \
+--output-folder ${EVAL_SAVE_FOLDER} \
 --reactonly \
 --task empchat
 ```
 
+Note: we pass in a separate dictionary (`--bleu-dict`) when calculating the self-BLEU of BERT models in order to match tokenization between Transformer and BERT models.
+
 #### EmoPrepend-1
 
-[ADD: ED]
+[ADD: ED. Maybe just say which flags to add for this, to fine-tuning, P@1,100, and self-BLEU calls]
 
 ## References
 
