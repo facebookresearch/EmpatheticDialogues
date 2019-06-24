@@ -113,9 +113,7 @@ python retrieval_eval_bleu.py \
 ### BERT-based retrieval
 
 #### Pretraining
-
 ```
-# Training
 python retrieval_train.py \
 --batch-size 256 \
 --bert-dim 300 \
@@ -132,46 +130,10 @@ python retrieval_train.py \
 --num-epochs 10000 \
 --optimizer adamax \
 --reddit-folder ${BERT_TOKENIZED_REDDIT_DATA_FOLDER}
-
-# P@1,100
-python retrieval_train.py \
---batch-size 256 \
---bert-dim 300 \
---cuda \
---dataset-name empchat \
---dict-max-words 250000 \
---display-iter 100 \
---embeddings None \
---empchat-folder ${EMPATHETIC_DIALOGUES_DATA_FOLDER} \
---max-hist-len 4 \
---model bert \
---model-dir ${EVAL_SAVE_FOLDER} \
---model-name model \
---optimizer adamax \
---pretrained ${TRAIN_SAVE_FOLDER}/model.mdl \
---reactonly
-
-# Self-BLEU (EmpatheticDialogues context/candidates)
-python retrieval_eval_bleu.py \
---bleu-dict ${PATH_TO_MODEL_WITH_TRANSFORMER_DICT} \
---empchat-cands \
---empchat-folder ${EMPATHETIC_DIALOGUES_DATA_FOLDER} \
---max-hist-len 4 \
---model ${TRAIN_SAVE_FOLDER}/model.mdl \
---name model \
---output-folder ${EVAL_SAVE_FOLDER} \
---reactonly \
---task empchat
 ```
-
-Note: we pass in a separate dictionary (`--bleu-dict`) when calculating the self-BLEU of BERT models in order to match tokenization between Transformer and BERT models.
 
 #### Fine-tuning
-
-[[[Maybe generalize the eval commands, as above]]]
-
 ```
-# Training
 python retrieval_train.py \
 --batch-size 256 \
 --bert-dim 300 \
@@ -190,7 +152,10 @@ python retrieval_train.py \
 --num-epochs 100 \
 --optimizer adamax \
 --stop-crit-num-epochs 10
+```
 
+#### Evaluation
+```
 # P@1,100
 python retrieval_train.py \
 --batch-size 256 \
@@ -226,7 +191,7 @@ Note: we pass in a separate dictionary (`--bleu-dict`) when calculating the self
 
 #### EmoPrepend-1
 
-[ADD: ED. Maybe just say which flags to add for this, to fine-tuning, P@1,100, and self-BLEU calls]
+[[[ADD THIS: Maybe just say which flags to add for this, to fine-tuning, P@1,100, and self-BLEU calls]]]
 
 ## References
 
