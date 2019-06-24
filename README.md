@@ -30,15 +30,102 @@ wget https://dl.fbaipublicfiles.com/parlai/empatheticdialogues/empatheticdialogu
 
 ### Transformer-based retrieval
 
-[ADD COMMANDS: pretraining, fine-tuning]
+#### Pretraining
+```
+python retrieval_train.py \
+--batch-size 512 \
+--cuda \
+--dataset-name reddit \
+--dict-max-words 250000 \
+--display-iter 250 \
+--embeddings ${REDDIT_EMBEDDINGS_PATH} \
+--empchat-folder ${EMPATHETIC_DIALOGUES_DATA_FOLDER} \
+--learn-embeddings \
+--learning-rate 8e-4 \
+--model transformer \
+--model-dir ${TRAIN_SAVE_FOLDER} \
+--model-name model \
+--n-layers 4 \
+--num-epochs 10000 \
+--optimizer adamax \
+--reddit-folder ${REDDIT_DATA_FOLDER} \
+--transformer-dim 300 \
+--transformer-n-heads 6
+```
+
+#### Fine-tuning
+```
+python retrieval_train.py \
+--batch-size 512 \
+--cuda \
+--dataset-name empchat \
+--dict-max-words 250000 \
+--display-iter 250 \
+--empchat-folder ${EMPATHETIC_DIALOGUES_DATA_FOLDER} \
+--learn-embeddings \
+--learning-rate 8e-4 \
+--load-checkpoint ${PRETRAINED_MODEL_PATH} \
+--max-hist-len 4 \
+--model transformer \
+--model-dir ${TRAIN_SAVE_FOLDER} \
+--model-name model \
+--n-layers 4 \
+--num-epochs 10 \
+--optimizer adamax \
+--reddit-folder ${REDDIT_DATA_FOLDER} \
+--transformer-dim 300 \
+--transformer-n-heads 6
+```
+
+#### Evaluation
+```
+# P@1,100
+python retrieval_train.py \
+--batch-size 512 \
+--cuda \
+--dataset-name empchat \
+--dict-max-words 250000 \
+--display-iter 250 \
+--empchat-folder ${EMPATHETIC_DIALOGUES_DATA_FOLDER} \
+--learning-rate 8e-4 \
+--max-hist-len 4 \
+--model transformer \
+--model-dir ${EVAL_SAVE_FOLDER} \
+--model-name model \
+--n-layers 4 \
+--optimizer adamax \
+--pretrained ${TRAIN_SAVE_FOLDER}/model.mdl \
+--reactonly \
+--transformer-dim 300 \
+--transformer-n-heads 6
+
+# Self-BLEU
+python retrieval_eval_bleu.py \
+--empchat-cands \
+--empchat-folder ${EMPATHETIC_DIALOGUES_DATA_FOLDER} \
+--max-hist-len 4 \
+--model ${TRAIN_SAVE_FOLDER}/model.mdl \
+--name model \
+--output-folder ${EVAL_SAVE_FOLDER} \
+--reactonly \
+--task empchat
+```
 
 ### BERT-based retrieval
 
-[ADD COMMANDS: pretraining, fine-tuning]
+#### Pretraining
 
-### [OTHER COMMANDS]
+[ADD: R cands (once completed)]
 
-[ADD COMMANDS]
+[ADD: ED cands (once completed)]
+
+#### Fine-tuning
+
+[ADD: ED]
+
+#### EmoPrepend-1
+
+[ADD: ED]
 
 ## References
 
