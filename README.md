@@ -121,7 +121,62 @@ python retrieval_eval_bleu.py \
 
 #### Fine-tuning
 
-[ADD: ED]
+[[[Maybe generalize the eval commands, as above]]]
+
+```
+# Training
+python retrieval_train.py \
+--batch-size 256 \
+--bert-dim 300 \
+--cuda \
+--dataset-name empchat \
+--dict-max-words 250000 \
+--display-iter 100 \
+--embeddings None \
+--empchat-folder {empchat_folder} \
+--learning-rate 1e-5 \
+--load-checkpoint {BERT_PRETRAINED_PATH} \
+--max-hist-len 4 \
+--model bert \
+--model-dir {finetune_folder} \
+--model-name model \
+--num-epochs 100 \
+--optimizer adamax \
+--stop-crit-num-epochs 10 \
+{additional_flags}
+
+# P@1,100
+python retrieval_train.py \
+--batch-size 256 \
+--bert-dim 300 \
+--cuda \
+--dataset-name empchat \
+--dict-max-words 250000 \
+--display-iter 100 \
+--embeddings None \
+--empchat-folder {empchat_folder} \
+--learning-rate 1e-5 \
+--max-hist-len 4 \
+--model bert \
+--model-dir {eval_folder} \
+--model-name model \
+--optimizer adamax \
+--pretrained {finetune_folder}/model.mdl \
+--reactonly \
+{additional_flags}
+
+# Self-BLEU
+python retrieval_eval_bleu.py \
+--bleu-dict {HANNAHS_TRANSFORMER_PRETRAINED_PATH} \
+--empchat-cands \
+--empchat-folder {empchat_folder} \
+--max-hist-len 4 \
+--model {finetune_folder}/model.mdl \
+--name model \
+--output-folder {eval_folder} \
+--reactonly \
+--task empchat
+```
 
 #### EmoPrepend-1
 
