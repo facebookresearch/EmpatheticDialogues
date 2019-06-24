@@ -116,22 +116,22 @@ python retrieval_eval_bleu.py \
 #### Pretraining
 
 ```
-python {REPO_FOLDER}/retrieval_train.py \
---batch-size {batch_size:d} \
+python retrieval_train.py \
+--batch-size 256 \
 --bert-dim 300 \
 --cuda \
 --dataset-name reddit \
 --dict-max-words 250000 \
 --display-iter 100 \
 --embeddings None \
---empchat-folder {empchat_folder} \
+--empchat-folder ${EMPATHETIC_DIALOGUES_DATA_FOLDER} \
 --learning-rate 6e-5 \
 --model bert \
---model-dir {save_folder} \
+--model-dir ${TRAIN_SAVE_FOLDER} \
 --model-name model \
 --num-epochs 10000 \
 --optimizer adamax \
---reddit-folder {REDDIT_BERT_FOLDER}
+--reddit-folder ${BERT_TOKENIZED_REDDIT_DATA_FOLDER}
 ```
 
 [ADD: eval on R cands]
