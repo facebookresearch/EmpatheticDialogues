@@ -2,6 +2,14 @@
 
 PyTorch original implementation of Towards Empathetic Open-domain Conversation Models: a New Benchmark and Dataset (https://arxiv.org/abs/1811.00207).
 
+## Dataset
+
+To download the EmpatheticDialogues dataset:
+
+```
+wget https://dl.fbaipublicfiles.com/parlai/empatheticdialogues/empatheticdialogues.tar.gz
+```
+
 ## Dependencies
 
 Versions given are what the code has been tested on.
@@ -17,14 +25,6 @@ Versions given are what the code has been tested on.
 - [pandas](https://pandas.pydata.org/) (0.22.0; for DailyDialog dataset)
 - [ParlAI](https://parl.ai/) ([commit used](https://github.com/facebookresearch/ParlAI/commit/471db18c47d322d814f4e1bba6e35d9da6ac31ff); for BERT model)
 - [pytorch-pretrained-BERT](https://github.com/huggingface/pytorch-pretrained-BERT) (0.5.1; for BERT model)
-
-## Dataset
-
-To download the EmpatheticDialogues dataset:
-
-```
-wget https://dl.fbaipublicfiles.com/parlai/empatheticdialogues/empatheticdialogues.tar.gz
-```
 
 ## Commands
 
