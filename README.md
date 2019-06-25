@@ -2,6 +2,13 @@
 
 PyTorch original implementation of Towards Empathetic Open-domain Conversation Models: a New Benchmark and Dataset (https://arxiv.org/abs/1811.00207).
 
+We provide a novel dataset of 25k conversations grounded in emotional situations. The code in this repo demonstrates that automated metrics (P@1,100 and BLEU) are improved both when using candidates from our dataset and when fine-tuning on it.
+
+This repo contains code for:
+- Transformer-based retrieval (pretraining, fine-tuning)
+- BERT-based retrieval (pretraining, fine-tuning)
+- Prepending classifier labels (e.g. EmoPrepend-1)
+
 ## Dataset
 
 To download the EmpatheticDialogues dataset:
@@ -98,7 +105,7 @@ python retrieval_train.py \
 --transformer-dim 300 \
 --transformer-n-heads 6
 
-# Self-BLEU (EmpatheticDialogues context/candidates)
+# BLEU (EmpatheticDialogues context/candidates)
 python retrieval_eval_bleu.py \
 --empchat-cands \
 --empchat-folder ${EMPATHETIC_DIALOGUES_DATA_FOLDER} \
@@ -174,7 +181,7 @@ python retrieval_train.py \
 --pretrained ${TRAIN_SAVE_FOLDER}/model.mdl \
 --reactonly
 
-# Self-BLEU (EmpatheticDialogues context/candidates)
+# BLEU (EmpatheticDialogues context/candidates)
 python retrieval_eval_bleu.py \
 --bleu-dict ${PATH_TO_MODEL_WITH_TRANSFORMER_DICT} \
 --empchat-cands \
@@ -187,7 +194,7 @@ python retrieval_eval_bleu.py \
 --task empchat
 ```
 
-Note: we pass in a separate dictionary (`--bleu-dict`) in order to use the same tokenization when calculating the self-BLEU of both Transformer and BERT models.
+Note: we pass in a separate dictionary (`--bleu-dict`) in order to use the same tokenization when calculating the BLEU of both Transformer and BERT models.
 
 #### EmoPrepend-1
 
