@@ -191,7 +191,12 @@ Note: we pass in a separate dictionary (`--bleu-dict`) when calculating the self
 
 #### EmoPrepend-1
 
-[[[ADD THIS: Maybe just say which flags to add for this, to fine-tuning, P@1,100, and self-BLEU calls]]]
+Add the following flags when calling `retrieval_train.py`:
+```
+--fasttext 1 \
+--fasttext-path ${PATH_TO_TRAINED_FASTTEXT_MODEL} \
+--fasttext-type emo
+```
 
 ## References
 
