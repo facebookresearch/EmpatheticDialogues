@@ -10,7 +10,7 @@
 # without the long chain of dependency.
 # Thanks to the fact that python is not typed whatsoever, this should work
 
-from ed.datasets.tokens import tokenize
+from empchat.datasets.tokens import tokenize
 
 
 class ParlAIDictionary:

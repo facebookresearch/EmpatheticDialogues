@@ -15,13 +15,13 @@ import torch
 from fairseq import bleu
 from tqdm import tqdm
 
-from ed.datasets.dailydialog import DDDataset
-from ed.datasets.empchat import EmpDataset
-from ed.datasets.reddit import RedditDataset
-from ed.datasets.parlai_dictionary import ParlAIDictionary
-from ed.datasets.tokens import tokenize, PAD_TOKEN, START_OF_COMMENT, UNK_TOKEN
-from ed.models import load as load_model, score_candidates
-from ed.util import get_opt
+from empchat.datasets.dailydialog import DDDataset
+from empchat.datasets.empchat import EmpDataset
+from empchat.datasets.reddit import RedditDataset
+from empchat.datasets.parlai_dictionary import ParlAIDictionary
+from empchat.datasets.tokens import tokenize, PAD_TOKEN, START_OF_COMMENT, UNK_TOKEN
+from empchat.models import load as load_model, score_candidates
+from empchat.util import get_opt
 
 
 logger = logging.getLogger()

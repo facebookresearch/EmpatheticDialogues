@@ -8,7 +8,7 @@
 import torch
 import torch.nn as nn
 
-from ed.datasets.tokens import (
+from empchat.datasets.tokens import (
     BERT_ID,
     EMPTYPERSONA_TOKEN,
     PAD_TOKEN,

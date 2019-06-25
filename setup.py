@@ -21,7 +21,7 @@ with open("LICENSE") as f:
     license_ = f.read()
 
 setup(
-    name="ed",
+    name="empchat",
     version="0.1.0",
     description=(
         "PyTorch original implementation of Towards Empathetic Open-domain "

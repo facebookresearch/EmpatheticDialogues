@@ -11,8 +11,8 @@ import re
 import torch
 from torch.utils.data import Dataset
 
-from ed.datasets.parlai_dictionary import ParlAIDictionary
-from ed.datasets.tokens import get_bert_token_mapping, tokenize
+from empchat.datasets.parlai_dictionary import ParlAIDictionary
+from empchat.datasets.tokens import get_bert_token_mapping, tokenize
 
 
 def txt2vec(dic, text, fasttext_type=None):

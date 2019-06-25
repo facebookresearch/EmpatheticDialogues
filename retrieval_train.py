@@ -14,15 +14,15 @@ import torch
 import torch.nn.functional as F
 import torch.optim as optim
 
-from ed.datasets.loader import TrainEnvironment
-from ed.models import (
+from empchat.datasets.loader import TrainEnvironment
+from empchat.models import (
     create as create_model,
     load as load_model,
     load_embeddings,
     save as save_model,
     score_candidates,
 )
-from ed.util import get_logger, get_opt
+from empchat.util import get_logger, get_opt
 
 
 def loss_fn(ctx, labels):

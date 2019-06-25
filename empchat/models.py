@@ -10,9 +10,9 @@ import logging
 import torch
 import torch.nn as nn
 
-from ed.bert_local import BertAdapter
-from ed.datasets.tokens import PAD_TOKEN
-from ed.transformer_local import TransformerAdapter
+from empchat.bert_local import BertAdapter
+from empchat.datasets.tokens import PAD_TOKEN
+from empchat.transformer_local import TransformerAdapter
 
 
 def load_embeddings(opt, dictionary, model):

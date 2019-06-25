@@ -12,11 +12,11 @@ import os.path
 import torch
 from torch.utils.data import DataLoader
 
-from ed.datasets.empchat import EmpDataset
-from ed.datasets.dailydialog import DDDataset
-from ed.datasets.reddit import RedditDataset
-from ed.datasets.parlai_dictionary import ParlAIDictionary
-from ed.datasets.tokens import (
+from empchat.datasets.empchat import EmpDataset
+from empchat.datasets.dailydialog import DDDataset
+from empchat.datasets.reddit import RedditDataset
+from empchat.datasets.parlai_dictionary import ParlAIDictionary
+from empchat.datasets.tokens import (
     get_bert_token_mapping,
     BERT_ID,
     EMPTYPERSONA_TOKEN,

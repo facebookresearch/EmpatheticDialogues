@@ -12,7 +12,7 @@ import os.path
 import torch
 from torch.utils.data import Dataset
 
-from ed.datasets.tokens import BERT_ID, START_OF_COMMENT, UNK_TOKEN
+from empchat.datasets.tokens import BERT_ID, START_OF_COMMENT, UNK_TOKEN
 
 
 class RedditDataset(Dataset):
