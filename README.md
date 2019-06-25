@@ -187,7 +187,7 @@ python retrieval_eval_bleu.py \
 --task empchat
 ```
 
-Note: we pass in a separate dictionary (`--bleu-dict`) when calculating self-BLEU in order to use the same tokenization in measuring the self-BLEU of both Transformer and BERT models.
+Note: we pass in a separate dictionary (`--bleu-dict`) in order to use the same tokenization when calculating the self-BLEU of both Transformer and BERT models.
 
 #### EmoPrepend-1
 
