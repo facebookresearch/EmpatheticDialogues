@@ -198,7 +198,7 @@ Note: we pass in a separate dictionary (`--bleu-dict`) in order to use the same 
 
 #### EmoPrepend-1
 
-Add the following flags when calling `retrieval_train.py`:
+Add the following flags when calling `retrieval_train.py` or `retrieval_eval_bleu.py`:
 ```
 --fasttext 1 \
 --fasttext-path ${PATH_TO_TRAINED_FASTTEXT_MODEL} \
