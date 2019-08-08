@@ -129,7 +129,7 @@ def validate(
             else None
             for field in ex[:2]
         ]
-        f.write('|'.join(ex[2]))
+        f.write('|'.join(ex[2]) + '\n')
         ctx, cands = model(*params)
         all_context.append(ctx)
         all_cands.append(cands)
