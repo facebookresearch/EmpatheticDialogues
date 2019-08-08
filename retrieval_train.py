@@ -109,6 +109,7 @@ def validate(
         save_path = os.path.join(os.getcwd(), 'test_candidate_groupings.txt')
     else:
         save_path = os.path.join(os.getcwd(), 'valid_candidate_groupings.txt')
+    print(f'Saving candidate groupings to {save_path}.')
     f = open(save_path, 'w')
     for i, ex in enumerate(data_loader):
         if i == 0:
