@@ -104,13 +104,9 @@ def validate(
     correct = 0
     all_context = []
     all_cands = []
+    all_next_sentences = []
     n_skipped = 0
     dtype = model.module.opt.dataset_name
-    set_string = 'test' if is_test else 'valid'
-    shuffle_string = 'shuffled' if is_shuffled else 'unshuffled'
-    save_path = os.path.join(os.getcwd(), f'{set_string}_candidate_groupings_{shuffle_string}.txt')
-    print(f'Saving candidate groupings to {save_path}.')
-    f = open(save_path, 'w')
     for i, ex in enumerate(data_loader):
         if i == 0:
             print('First context tensor:')
@@ -129,10 +125,10 @@ def validate(
             else None
             for field in ex[:2]
         ]
-        f.write('|'.join(ex[2]) + '\n')
         ctx, cands = model(*params)
         all_context.append(ctx)
         all_cands.append(cands)
+        all_next_sentences.extend(ex[2])
         loss, nb_ok = loss_fn(ctx, cands)
         sum_losses += loss
         correct += nb_ok
@@ -140,17 +136,25 @@ def validate(
         examples += batch_size
         if examples >= max_exs and dtype == "reddit":
             break
-    f.close()
     n_examples = 0
     if len(all_context) > 0:
+        set_string = 'test' if is_test else 'valid'
+        shuffle_string = 'shuffled' if is_shuffled else 'unshuffled'
+        save_path = os.path.join(os.getcwd(), f'{set_string}_candidate_groupings_{shuffle_string}.txt')
+        print(f'Saving candidate groupings to {save_path}.')
+        f = open(save_path, 'w')
         logging.info("Processing candidate top-K")
         all_context = torch.cat(all_context, dim=0)  # [:50000]  # [N, 2h]
         all_cands = torch.cat(all_cands, dim=0)  # [:50000]  # [N, 2h]
         acc_ranges = [1, 3, 10]
         n_correct = {r: 0 for r in acc_ranges}
+        i_grouping = 0
         for context, cands in list(
             zip(all_context.split(nb_candidates), all_cands.split(nb_candidates))
         )[:-1]:
+            next_sentences = all_next_sentences[nb_candidates*i_grouping:nb_candidates*(i_grouping+1)]
+            f.write('|'.join(next_sentences) + '\n')
+            i_grouping += 1
             _, top_answers = score_candidates(context, cands)
             n_cands = cands.size(0)
             gt_index = torch.arange(n_cands, out=top_answers.new(n_cands, 1))
@@ -170,6 +174,7 @@ def validate(
             )
             + f" | valid time = {valid_time:.2f} (s)"
         )
+        f.close()
         return avg_loss
     return 10
 
