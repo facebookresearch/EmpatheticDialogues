@@ -90,6 +90,7 @@ def validate(
     epoch,
     model,
     data_loader,
+    is_shuffled,
     max_exs=100000,
     is_test=False,
     nb_candidates=100,
@@ -105,10 +106,9 @@ def validate(
     all_cands = []
     n_skipped = 0
     dtype = model.module.opt.dataset_name
-    if is_test:
-        save_path = os.path.join(os.getcwd(), 'test_candidate_groupings.txt')
-    else:
-        save_path = os.path.join(os.getcwd(), 'valid_candidate_groupings.txt')
+    set_string = 'test' if is_test else 'valid'
+    shuffle_string = 'shuffled' if is_shuffled else 'unshuffled'
+    save_path = os.path.join(os.getcwd(), f'{set_string}_candidate_groupings_{shuffle_string}.txt')
     print(f'Saving candidate groupings to {save_path}.')
     f = open(save_path, 'w')
     for i, ex in enumerate(data_loader):
@@ -278,22 +278,22 @@ def main(opt_):
         with torch.no_grad():
             logging.info("Validating on the valid set -unshuffled")
             validate(
-                0, net, valid_data, is_test=False, nb_candidates=opt_.hits_at_nb_cands
+                0, net, valid_data, is_test=False, nb_candidates=opt_.hits_at_nb_cands, is_shuffled=False,
             )
             logging.info("Validating on the hidden test set -unshuffled")
             validate(
-                0, net, test_data, is_test=True, nb_candidates=opt_.hits_at_nb_cands
+                0, net, test_data, is_test=True, nb_candidates=opt_.hits_at_nb_cands, is_shuffled=False,
             )
         valid_data = env.build_valid_dataloader(True)
         test_data = env.build_valid_dataloader(True, test=True)
         with torch.no_grad():
             logging.info("Validating on the valid set -shuffle")
             validate(
-                0, net, valid_data, is_test=False, nb_candidates=opt_.hits_at_nb_cands
+                0, net, valid_data, is_test=False, nb_candidates=opt_.hits_at_nb_cands, is_shuffled=True,
             )
             logging.info("Validating on the hidden test set -shuffle")
             validate(
-                0, net, test_data, is_test=True, nb_candidates=opt_.hits_at_nb_cands
+                0, net, test_data, is_test=True, nb_candidates=opt_.hits_at_nb_cands, is_shuffled=True,
             )
     else:
         train_model(opt_)
