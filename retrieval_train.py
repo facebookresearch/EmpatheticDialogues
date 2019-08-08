@@ -283,7 +283,7 @@ def main(opt_):
             logging.info("Validating on the hidden test set -unshuffled")
             validate(
                 0, net, test_data, is_test=True, nb_candidates=opt_.hits_at_nb_cands
-        )
+            )
         valid_data = env.build_valid_dataloader(True)
         test_data = env.build_valid_dataloader(True, test=True)
         with torch.no_grad():
