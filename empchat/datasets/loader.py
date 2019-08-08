@@ -204,7 +204,8 @@ class TrainEnvironment:
         contexts, next_ = [
             pad(ex, self.pad_idx) for ex in [input_list[0], input_list[1]]
         ]
-        return contexts, next_
+        next_strings = input_list[3]
+        return contexts, next_, next_strings
 
     def to_words(self, tensor):
         return " ".join(self.dict["iwords"][x] for x in tensor.tolist())

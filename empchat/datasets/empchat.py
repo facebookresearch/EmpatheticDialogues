@@ -158,7 +158,7 @@ class EmpDataset(Dataset):
                         :maxlen
                     ]
                     lbl_min = torch.LongTensor([[dic[sparts[2]]]])
-                    self.data.append((contextt, label, lbl_min))
+                    self.data.append((contextt, label, lbl_min, sent))
                     self.ids.append((sparts[0], sparts[1]))
             else:
                 history = []

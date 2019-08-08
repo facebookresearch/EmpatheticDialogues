@@ -8,6 +8,7 @@
 #
 
 import logging
+import os
 import time
 
 import torch
@@ -104,7 +105,17 @@ def validate(
     all_cands = []
     n_skipped = 0
     dtype = model.module.opt.dataset_name
+    if is_test:
+        save_path = os.path.join(os.getcwd(), 'test_candidate_groupings.txt')
+    else:
+        save_path = os.path.join(os.getcwd(), 'valid_candidate_groupings.txt')
+    f = open(save_path, 'w')
     for i, ex in enumerate(data_loader):
+        if i == 0:
+            print('First context tensor:')
+            print(ex[0])
+            print('First "next" tensor:')
+            print(ex[1])
         batch_size = ex[0].size(0)
         if dtype == "reddit" and is_test and n_skipped < max_exs:
             n_skipped += batch_size
@@ -115,8 +126,9 @@ def validate(
             else field
             if field is not None
             else None
-            for field in ex
+            for field in ex[:2]
         ]
+        f.write('|'.join(ex[2]))
         ctx, cands = model(*params)
         all_context.append(ctx)
         all_cands.append(cands)
@@ -127,6 +139,7 @@ def validate(
         examples += batch_size
         if examples >= max_exs and dtype == "reddit":
             break
+    f.close()
     n_examples = 0
     if len(all_context) > 0:
         logging.info("Processing candidate top-K")
@@ -259,17 +272,6 @@ def main(opt_):
         env = TrainEnvironment(net.opt, dictionary)
         if opt_.cuda:
             net = torch.nn.DataParallel(net.cuda())
-        valid_data = env.build_valid_dataloader(False)
-        test_data = env.build_valid_dataloader(False, test=True)
-        with torch.no_grad():
-            logging.info("Validating on the valid set -unshuffled")
-            validate(
-                0, net, valid_data, is_test=False, nb_candidates=opt_.hits_at_nb_cands
-            )
-            logging.info("Validating on the hidden test set -unshuffled")
-            validate(
-                0, net, test_data, is_test=True, nb_candidates=opt_.hits_at_nb_cands
-            )
         valid_data = env.build_valid_dataloader(True)
         test_data = env.build_valid_dataloader(True, test=True)
         with torch.no_grad():
