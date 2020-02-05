@@ -85,10 +85,10 @@ class EmpDataset(Dataset):
         newmaxlen = maxlen
         self.max_hist_len = history_len
         if fasttext is not None:
-            import fastText
+            import fasttext as fasttext_module
 
             assert fasttext_type is not None and fasttext_path is not None
-            self.ftmodel = fastText.FastText.load_model(fasttext_path)
+            self.ftmodel = fasttext_module.FastText.load_model(fasttext_path)
             newmaxlen += fasttext
             maxlen += fasttext
             if hasattr(dic, "bert_tokenizer"):

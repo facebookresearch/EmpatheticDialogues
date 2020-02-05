@@ -17,6 +17,19 @@ To download the EmpatheticDialogues dataset:
 wget https://dl.fbaipublicfiles.com/parlai/empatheticdialogues/empatheticdialogues.tar.gz
 ```
 
+## Models
+
+To reproduce paper numbers, see the evaluation commands in the Commands section, and use the following trained models:
+
+```
+wget https://dl.fbaipublicfiles.com/parlai/empatheticdialogues/models/normal_transformer_pretrained.mdl  # Normal Transformer, pretrained
+wget https://dl.fbaipublicfiles.com/parlai/empatheticdialogues/models/normal_transformer_finetuned.mdl  # Normal Transformer, fine-tuned
+wget https://dl.fbaipublicfiles.com/parlai/empatheticdialogues/models/bert_pretrained.mdl  # BERT, pretrained
+wget https://dl.fbaipublicfiles.com/parlai/empatheticdialogues/models/bert_finetuned.mdl  # BERT, fine-tuned
+wget https://dl.fbaipublicfiles.com/parlai/empatheticdialogues/models/bert_finetuned_emoprepend1.mdl  # BERT, fine-tuned (EmoPrepend-1)
+wget https://dl.fbaipublicfiles.com/parlai/empatheticdialogues/models/fasttext_empathetic_dialogues.mdl  # fastText classifier used for EmoPrepend-1
+```
+
 ## Dependencies
 
 Versions given are what the code has been tested on.
@@ -28,7 +41,7 @@ Versions given are what the code has been tested on.
 
 ### Optional
 - [fairseq](https://fairseq.readthedocs.io/en/latest/) (0.6.2; for BLEU calculation in `retrieval_eval_bleu.py`)
-- [fastText](https://fasttext.cc/) (0.8.22; for Prepend models)
+- [fastText](https://fasttext.cc/) (0.9.1; for Prepend models)
 - [pandas](https://pandas.pydata.org/) (0.22.0; for DailyDialog dataset)
 - [ParlAI](https://parl.ai/) ([commit used](https://github.com/facebookresearch/ParlAI/commit/471db18c47d322d814f4e1bba6e35d9da6ac31ff); for BERT model)
 - [pytorch-pretrained-BERT](https://github.com/huggingface/pytorch-pretrained-BERT) (0.5.1; for BERT model)
@@ -194,7 +207,7 @@ python retrieval_eval_bleu.py \
 --task empchat
 ```
 
-Note: we pass in a separate dictionary (`--bleu-dict`) in order to use the same tokenization when calculating the BLEU of both Transformer and BERT models.
+Note: we pass in a separate dictionary (`--bleu-dict`) in order to use the same tokenization when calculating the BLEU of both Transformer and BERT models. For this, you can use the pretrained normal Transformer model listed in the Models section above.
 
 #### EmoPrepend-1
 
@@ -204,6 +217,7 @@ Add the following flags when calling `retrieval_train.py` or `retrieval_eval_ble
 --fasttext-path ${PATH_TO_TRAINED_FASTTEXT_MODEL} \
 --fasttext-type emo
 ```
+For `${PATH_TO_TRAINED_FASTTEXT_MODEL}`, you can pass in the fastText classifier in the Models section above.
 
 ## References
 
