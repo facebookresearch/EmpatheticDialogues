@@ -5,3 +5,9 @@ dist/
 
 # PyCharm
 .idea/
+
+# Python
+*.pyc
+
+# Repo-specific
+retrieved_split_*
