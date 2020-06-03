@@ -24,7 +24,7 @@ with torch.no_grad():
             to_predict = []
             for answer in batch_answer:
                 tags.append(answer['trees'])
-            
+            torch.cuda.empty_cache() 
             z = 1
 
 with open('constituency_trees.txt', 'w') as filehandle:
