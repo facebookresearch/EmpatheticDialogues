@@ -11,3 +11,9 @@ dist/
 
 # Repo-specific
 retrieved_split_*
+
+#
+stanford_*
+stanford-*
+apache-opennlp-1.9.2
+elmo-constituency-parser
