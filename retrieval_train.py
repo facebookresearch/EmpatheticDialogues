@@ -103,7 +103,7 @@ def validate(
     all_context = []
     all_cands = []
     n_skipped = 0
-    dtype = model.module.opt.dataset_name
+    dtype = model.opt.dataset_name
     for i, ex in enumerate(data_loader):
         batch_size = ex[0].size(0)
         if dtype == "reddit" and is_test and n_skipped < max_exs:
@@ -253,6 +253,7 @@ def main(opt_):
     if opt_.pretrained:
         net, dictionary = load_model(opt_.pretrained, opt_)
         net.opt.dataset_name = opt_.dataset_name
+        net.opt.empchat_folder = opt_.empchat_folder
         net.opt.reddit_folder = opt_.reddit_folder
         net.opt.reactonly = opt_.reactonly
         net.opt.max_hist_len = opt_.max_hist_len
