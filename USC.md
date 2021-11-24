@@ -19,3 +19,7 @@ download empathetic dialogues dataset and put it in `data/` directory
 `pip install fairseq==0.6.2`
 
 `pip install git+git://github.com/facebookresearch/ParlAI.git@471db18c47d322d814f4e1bba6e35d9da6ac31ff`
+
+`pip install pytorch-pretrained-bert==0.5.1`
+
+Set environment variable to select EMO classifier model `EMO_MODEL=fast(default)|lstm|attn|trans`

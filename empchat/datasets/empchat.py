@@ -85,10 +85,15 @@ class EmpDataset(Dataset):
         newmaxlen = maxlen
         self.max_hist_len = history_len
         if fasttext is not None:
-            import fasttext as fasttext_module
+            emo_model_type = os.getenv("EMO_MODEL", "fast")
+            if emo_model_type == "fast":
+                import fasttext as fasttext_module
 
-            assert fasttext_type is not None and fasttext_path is not None
-            self.ftmodel = fasttext_module.FastText.load_model(fasttext_path)
+                assert fasttext_type is not None and fasttext_path is not None
+                self.ftmodel = fasttext_module.FastText.load_model(fasttext_path)
+            else:
+                from empchat.classifiers import get_classifier_model
+                self.ftmodel = get_classifier_model(emo_model_type, fasttext_path)
             newmaxlen += fasttext
             maxlen += fasttext
             if hasattr(dic, "bert_tokenizer"):
