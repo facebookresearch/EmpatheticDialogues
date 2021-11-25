@@ -1,6 +1,5 @@
 from typing import List
 
-
 class Instance:
     words: List[str]
     ori_sentence: str

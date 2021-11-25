@@ -6,7 +6,7 @@ import re
 import numpy as np
 import torch
 
-from torch._six import container_abcs, string_classes, int_classes
+from torch._six import container_abcs, string_classes, int_classes  ##CHANGED
 
 from utils import UNK
 from utils import build_label_idx, check_all_labels_in_dict, check_all_obj_is_None
@@ -16,6 +16,7 @@ Feature = collections.namedtuple('Feature',
                                  'words seq_len label')
 Feature.__new__.__defaults__ = (None,) * 6
 
+##CHANGED FROM HERE
 np_str_obj_array_pattern = re.compile(r'[SaUO]')
 default_collate_err_msg_format = (
     "default_collate: batch must contain tensors, numpy arrays, numbers, "
@@ -66,7 +67,7 @@ def default_collate(batch):
         return [default_collate(samples) for samples in transposed]
 
     raise TypeError(default_collate_err_msg_format.format(elem_type))
-
+##TILL HERE
 
 class EmotionDataset(Dataset):
     def __init__(self, file: str,
@@ -142,6 +143,7 @@ class EmotionDataset(Dataset):
         return self.inst_ids[index]
 
     # TODO: fix logic, mostly not supported in older versions
+    # removed comment from below
     def collate_fn(self, batch: List[Feature]):
         word_seq_lens = [len(feature.words) for feature in batch]
         max_seq_len = max(word_seq_lens)
