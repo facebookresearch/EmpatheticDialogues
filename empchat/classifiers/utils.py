@@ -1,5 +1,5 @@
 from typing import List, Tuple, Dict
-from instance import Instance
+from .instance import Instance
 
 PAD = "<PAD>"
 UNK = "<UNK>"
@@ -16,10 +16,9 @@ def build_label_idx(insts: List[Instance]) -> Tuple[List[str], Dict[str, int]]:
     label2idx[PAD] = len(label2idx)
     idx2labels.append(PAD)
     for inst in insts:
-        for label in inst.label:
-            if label not in label2idx:
-                idx2labels.append(label)
-                label2idx[label] = len(label2idx)
+        if inst.label not in label2idx:
+            idx2labels.append(inst.label)
+            label2idx[inst.label] = len(label2idx)
 
     label_size = len(label2idx)
     print("#labels: {}".format(label_size))
@@ -29,12 +28,11 @@ def build_label_idx(insts: List[Instance]) -> Tuple[List[str], Dict[str, int]]:
 
 def check_all_labels_in_dict(insts: List[Instance], label2idx: Dict[str, int]):
     for inst in insts:
-        for label in inst.label:
-            if label not in label2idx:
-                raise ValueError(
-                    f"The label {label} does not exist in label2idx dict. The label might not appear in the training "
-                    f"set. "
-                )
+        if inst.label not in label2idx:
+            raise ValueError(
+                f"The label {inst.label} does not exist in label2idx dict. The label might not appear in the training "
+                f"set. "
+            )
 
 
 def build_word_idx(trains: List[Instance], devs: List[Instance], tests: List[Instance]) -> Tuple[
