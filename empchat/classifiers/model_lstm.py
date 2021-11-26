@@ -171,9 +171,10 @@ if __name__ == "__main__":
     )
 
     # load data
-    train_dataset = EmotionDataset("data/train.csv", True, tokenizer.tokenize)
-    valid_dataset = EmotionDataset("data/valid.csv", False, tokenizer.tokenize, label2idx=train_dataset.label2idx)
-    test_dataset = EmotionDataset("data/test.csv", False, tokenizer.tokenize, label2idx=train_dataset.label2idx)
+    train_dataset = EmotionDataset("data/train.csv", True, tokenizer.tokenize, N_SEQ)
+    valid_dataset = EmotionDataset("data/valid.csv", False, tokenizer.tokenize, N_SEQ,
+                                   label2idx=train_dataset.label2idx)
+    test_dataset = EmotionDataset("data/test.csv", False, tokenizer.tokenize, N_SEQ, label2idx=train_dataset.label2idx)
 
     word2idx, idx2word, char2idx, idx2char = build_word_idx(
         train_dataset.insts, valid_dataset.insts, test_dataset.insts

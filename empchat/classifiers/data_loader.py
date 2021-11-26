@@ -75,6 +75,7 @@ class EmotionDataset(Dataset):
     def __init__(self, file: str,
                  is_train: bool,
                  tokenizer,
+                 max_seq_len: int,
                  replace_digits=False,
                  label2idx: Dict[str, int] = None):
         """
@@ -82,6 +83,7 @@ class EmotionDataset(Dataset):
         """
         # read all the instances. sentences and labels
         self.tokenizer = tokenizer
+        self.max_seq_len = max_seq_len
         insts = self.read_txt(file, replace_digits)
         self.insts = insts
         if is_train:
@@ -120,12 +122,8 @@ class EmotionDataset(Dataset):
             )
 
     def batchify(self, batch):
-        word_seq_lens = [feature.seq_len for feature in batch]
-        # max_seq_len = max(word_seq_lens)
-        max_seq_len = 50 # have to make global
-
         for i, feature in enumerate(batch):
-            padding_length = max_seq_len - len(feature.words)
+            padding_length = self.max_seq_len - len(feature.words)
             words = feature.words + [0] * padding_length
             label = feature.label if feature.label is not None else None
 
@@ -148,7 +146,7 @@ class EmotionDataset(Dataset):
                 if replace_digits:
                     sentence = re.sub('\d', '0', sentence)
                 # convert sentence to words, tokenize
-                words = self.tokenizer(sentence)
+                words = self.tokenizer(sentence)[:self.max_seq_len]
                 label = sparts[2]
                 insts.append(Instance(sentence, words, label))
         print("number of sentences: {}".format(len(insts)))
