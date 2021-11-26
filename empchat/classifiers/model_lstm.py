@@ -26,12 +26,12 @@ class EmotionClassifierModel(nn.Module):
         # Multihead attention:
         # TODO 1: probably MHA was not available for that version
         #  if so should switch to keras ASAP
-        # self.mha = nn.MultiheadAttention(2 * hidden_dim, num_heads=8)
+        self.mha = nn.MultiheadAttention(2 * hidden_dim, num_heads=8)
         # Flatten into [batch_size, 2*N_HIDDEN*N_SEQ]
-        # self.flatten = nn.Flatten()
-        # Fully connected classifer
+        self.flatten = nn.Flatten()
+        # Fully connected classifier
         self.fc1 = nn.Linear(
-            # N_SEQ *
+            N_SEQ *
             2 * hidden_dim, 1024)  # As bidirectional
         self.dropout = nn.Dropout(dropout)
         self.fc2 = nn.Linear(1024, 256)
@@ -42,12 +42,16 @@ class EmotionClassifierModel(nn.Module):
     def forward(self, text):
         # Embedding of the given "text" represented as a vector
         embedded = self.embedding(text)  # [batch size, sent len, emb dim]
+        print(len(embedded[0]))
         # LSTM output
         lstm_output, (ht, cell) = self.lstm(embedded)  # [batch size, sent len, hid dim], [ batch size, 1, hid dim]
+        print(lstm_output.size())
         # Compute attention:
         attn_output, attn_output_weights = self.mha(lstm_output, lstm_output, lstm_output)
+        print(attn_output.size())
         # Flatten:
         x = self.flatten(attn_output)
+        print(x.size())
         # Classifer:
         # Layer 1
         x = self.fc1(x)
@@ -123,21 +127,21 @@ def evaluate(model, iterator, criterion):
     epoch_acc = 0
 
     model.eval()  # Tells the model that we are currently evaluating the model
+    #
+    # with torch.no_grad():  # Temporarily set all the requires_grad flag to false
 
-    with torch.no_grad():  # Temporarily set all the requires_grad flag to false
+    for text, seq_len, labels in iterator:
+        text = text.to(device)
+        labels = labels.to(device)
 
-        for text, seq_len, labels in iterator:
-            text = text.to(device)
-            labels = labels.to(device)
+        logits = model(text)
+        labels = labels.type_as(logits)
 
-            logits = model(text)
-            labels = labels.type_as(logits)
+        loss = criterion(logits, labels)
+        acc = binary_accuracy(logits, labels)
 
-            loss = criterion(logits, labels)
-            acc = binary_accuracy(logits, labels)
-
-            epoch_loss += loss.item()
-            epoch_acc += acc.item()
+        epoch_loss += loss.item()
+        epoch_acc += acc.item()
 
     return epoch_loss / len(iterator), epoch_acc / len(iterator)
 
@@ -189,6 +193,7 @@ if __name__ == "__main__":
     # Maps each word in our vocab to it's embedded representation, if the word is present in the GloVe embeddings
     embedding_matrix = np.zeros((N_vocab, N_EMB))
     n_match = 0
+    print(len(word2idx))
     for word, i in word2idx.items():
         embedding_vector = embeddings_index.get(word)
         if embedding_vector is not None:
@@ -197,9 +202,11 @@ if __name__ == "__main__":
         else:
             embedding_matrix[i] = np.random.normal(0, 1, (N_EMB,))
     print("Vocabulary match: ", n_match)
+    print(len(embedding_matrix))
 
     # Convert to torch tensor to be used directly in the embedding layer:
-    embeddings_tensor = torch.FloatTensor(embedding_matrix).to(device)
+    # embeddings_tensor = torch.LongTensor(embedding_matrix).to(device)
+    embeddings_tensor = torch.tensor(embedding_matrix, requires_grad=True).to(device)
 
     # convert to tensors
     train_dataset.convert_instances_to_feature_tensors(word2idx)
@@ -240,7 +247,7 @@ if __name__ == "__main__":
 
     optimizer = optim.Adam(model.parameters(), lr=1e-3)
     # TODO 3: change to multiclass, they probably have just binary labels
-    criterion = nn.BCEWithLogitsLoss()  # Binary crossentropy: This computes sigma(logits) too, much more numerically stable
+    criterion = nn.CrossEntropyLoss()  # Binary crossentropy: This computes sigma(logits) too, much more numerically stable
 
     model = model.to(device)
     criterion = criterion.to(device)

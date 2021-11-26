@@ -32,12 +32,12 @@ def default_collate(batch):
     if isinstance(elem, torch.Tensor):
         out = None
         # TODO 2: giving issues
-        if torch.utils.data.get_worker_info() is not None:
-            # If we're in a background process, concatenate directly into a
-            # shared memory tensor to avoid an extra copy
-            numel = sum([x.numel() for x in batch])
-            storage = elem.storage()._new_shared(numel)
-            out = elem.new(storage)
+        # if torch.utils.data.get_worker_info() is not None:
+        #     # If we're in a background process, concatenate directly into a
+        #     # shared memory tensor to avoid an extra copy
+        #     numel = sum([x.numel() for x in batch])
+        #     storage = elem.storage()._new_shared(numel)
+        #     out = elem.new(storage)
         return torch.stack(batch, 0, out=out)
     elif elem_type.__module__ == 'numpy' and elem_type.__name__ != 'str_' \
             and elem_type.__name__ != 'string_':
@@ -121,7 +121,8 @@ class EmotionDataset(Dataset):
 
     def batchify(self, batch):
         word_seq_lens = [feature.seq_len for feature in batch]
-        max_seq_len = max(word_seq_lens)
+        # max_seq_len = max(word_seq_lens)
+        max_seq_len = 50 # have to make global
 
         for i, feature in enumerate(batch):
             padding_length = max_seq_len - len(feature.words)

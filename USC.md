@@ -4,17 +4,18 @@ download empathetic dialogues dataset and put it in `data/` directory
 
 ### Setup comands:
 
-`conda create -n empathy python==3.6`
+`conda create -n empathy python=3.6`
 
 `conda activate empathy`
 
-`conda install numpy==1.14.3`
+`conda install numpy=1.14.3`
 
-`conda install pytorch-cpu==1.0.1 torchvision-cpu==0.2.2 cpuonly -c pytorch`
+`conda install pytorch==1.4.0 torchvision==0.5.0 cpuonly -c pytorch`
+
 
 `pip install tqdm==4.19.7`
 
-`conda install pandas==0.22.0`
+`conda install pandas=0.22.0`
 
 `pip install fairseq==0.6.2`
 
