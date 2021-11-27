@@ -280,9 +280,9 @@ if __name__ == "__main__":
         ids_word = []
         ids_label = []
         for word in inst.words:
-            ids_word += word2idx[word]
+            ids_word.append(word2idx[word])
         for label in inst.label:
-            ids_label += label2idx[label]
+            ids_label.append(label2idx[label])
         x_train.append(ids_word)
         y_train.append(ids_label)
 
@@ -293,9 +293,9 @@ if __name__ == "__main__":
         ids_word = []
         ids_label = []
         for word in inst.words:
-            ids_word += word2idx[word]
+            ids_word.append(word2idx[word])
         for label in inst.label:
-            ids_label += label2idx[label]
+            ids_label.append(label2idx[label])
         x_valid.append(ids_word)
         y_valid.append(ids_label)
 
