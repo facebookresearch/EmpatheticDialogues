@@ -207,7 +207,7 @@ def EmotionClassifierModel(N_EMB, N_SEQ, word2idx, label2idx, embedding_matrix):
     return model, callbacks_list
 
 if __name__ == "__main__":
-    start_time = time.time()
+    # start_time = time.time()
 
     from .data_loader import EmotionDataset
     # from torch.utils.data import DataLoader
@@ -308,16 +308,16 @@ if __name__ == "__main__":
 
     model, callbacks_list = EmotionClassifierModel(N_EMB, N_SEQ, word2idx, label2idx, embedding_matrix)
 
-    # Train model
-    model.fit(x_train, y_train, validation_data=(x_valid, y_valid), batch_size=BATCH_SIZE,
-              epochs=1)  # add callbacks=callbacks_list as another parameter later
+    # # Train model
+    # model.fit(x_train, y_train, validation_data=(x_valid, y_valid), batch_size=BATCH_SIZE,
+    #           epochs=1)  # add callbacks=callbacks_list as another parameter later
 
-    model.save("models/lstm_attention_v1_trained.h5")
+    # model.save("models/lstm_attention_v1_trained.h5")
 
-    # model = load_model("models/lstm_attention_v1_trained.h5")
+    model = load_model("models/lstm_attention_v1_trained.h5", compile=False)
 
-    end_time = time.time()
-    print("Time taken to train the model", (end_time - start_time))
+    # end_time = time.time()
+    # print("Time taken to train the model", (end_time - start_time))
 
     # Re-create the model to get attention vectors as well as label prediction
     model_with_attentions = keras.Model(inputs=model.input,
@@ -339,12 +339,25 @@ if __name__ == "__main__":
 
     # Make predictions
     label_probs, attentions = model_with_attentions.predict(encoded_samples)
-    label_probs = {idx2labels[_id]: prob for (label, _id), prob in zip(label2idx.items(), label_probs[0])}
-    emotions = [label for label, _ in label_probs.items()]
-    scores = [score for _, score in label_probs.items()]
 
-    print(emotions)
-    print(scores)
+    emotions_final = []
+    for i in range(len(label_probs)):
+        idx = np.argmax(label_probs[i])
+        emotion_final = idx2labels[idx]
+        emotions_final.append(emotion_final)
+
+    print(emotions_final)
+    print(len(emotions_final))
+
+    # label_probs = {idx2labels[_id]: prob for (label, _id), prob in zip(label2idx.items(), label_probs[0])}
+    #
+    # emotions = [label for label, _ in label_probs.items()]
+    # scores = [score for _, score in label_probs.items()]
+    #
+    # print(emotions)
+    # print(scores)
+
+
 
     # Convert to torch tensor to be used directly in the embedding layer:
     # embeddings_tensor = torch.LongTensor(embedding_matrix).to(device)
