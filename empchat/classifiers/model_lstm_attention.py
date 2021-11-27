@@ -173,22 +173,22 @@ def EmotionClassifierModel(N_EMB, N_SEQ, word2idx, label2idx, embedding_matrix):
 
     # Apply Bidirectional LSTM over embedded inputs
     lstm_outs = keras.layers.wrappers.Bidirectional(
-        keras.layers.LSTM(N_EMB, return_sequences=False)
+        keras.layers.LSTM(N_EMB, return_sequences=True)
     )(embedded_inputs)
 
     # Apply dropout to LSTM outputs to prevent overfitting
     lstm_outs = keras.layers.Dropout(0.2)(lstm_outs)
 
-    # # Attention Mechanism - Generate attention vectors
-    # input_dim = int(lstm_outs.shape[2])
-    # permuted_inputs = keras.layers.Permute((2, 1))(lstm_outs)
-    # attention_vector = keras.layers.TimeDistributed(keras.layers.Dense(1))(lstm_outs)
-    # attention_vector = keras.layers.Reshape((N_SEQ,))(attention_vector)
-    # attention_vector = keras.layers.Activation('softmax', name='attention_vec')(attention_vector)
-    # attention_output = keras.layers.Dot(axes=1)([lstm_outs, attention_vector])
+    # Attention Mechanism - Generate attention vectors
+    input_dim = int(lstm_outs.shape[2])
+    permuted_inputs = keras.layers.Permute((2, 1))(lstm_outs)
+    attention_vector = keras.layers.TimeDistributed(keras.layers.Dense(1))(lstm_outs)
+    attention_vector = keras.layers.Reshape((N_SEQ,))(attention_vector)
+    attention_vector = keras.layers.Activation('softmax', name='attention_vec')(attention_vector)
+    attention_output = keras.layers.Dot(axes=1)([lstm_outs, attention_vector])
 
     # Last layer: fully connected with softmax activation
-    fc = keras.layers.Dense(N_EMB, activation='relu')(lstm_outs)
+    fc = keras.layers.Dense(N_EMB, activation='relu')(attention_output)
     output = keras.layers.Dense(len(label2idx), activation='softmax')(fc)
 
     # Finally building model
@@ -207,7 +207,7 @@ def EmotionClassifierModel(N_EMB, N_SEQ, word2idx, label2idx, embedding_matrix):
     return model, callbacks_list
 
 if __name__ == "__main__":
-    start_time = time.time()
+    # start_time = time.time()
 
     from .data_loader import EmotionDataset
     # from torch.utils.data import DataLoader
@@ -308,16 +308,21 @@ if __name__ == "__main__":
 
     model, callbacks_list = EmotionClassifierModel(N_EMB, N_SEQ, word2idx, label2idx, embedding_matrix)
 
-    # Train model
-    model.fit(x_train, y_train, validation_data=(x_valid, y_valid), batch_size=BATCH_SIZE,
-              epochs=1)  # add callbacks=callbacks_list as another parameter later
+    # # Train model
+    # model.fit(x_train, y_train, validation_data=(x_valid, y_valid), batch_size=BATCH_SIZE,
+    #           epochs=1)  # add callbacks=callbacks_list as another parameter later
 
-    model.save("models/lstm_v1_trained.h5")
+    # model.save("models/lstm_attention_v1_trained.h5")
 
-    # model = load_model("models/lstm_v1_trained.h5", compile=False)
+    model = load_model("models/lstm_attention_v1_trained.h5", compile=False)
 
-    end_time = time.time()
-    print("Time taken to train the model", (end_time - start_time))
+    # end_time = time.time()
+    # print("Time taken to train the model", (end_time - start_time))
+
+    # Re-create the model to get attention vectors as well as label prediction
+    model_with_attentions = keras.Model(inputs=model.input,
+                                        outputs=[model.output,
+                                                 model.get_layer('attention_vec').output])
 
     encoded_samples = [] # encoded_samples = [[word2idx[word] for word in valid_dataset]]
     for inst in valid_dataset.insts:
@@ -333,7 +338,7 @@ if __name__ == "__main__":
     encoded_samples = np.array(encoded_samples)
 
     # Make predictions
-    label_probs = model.predict(encoded_samples)
+    label_probs, attentions = model_with_attentions.predict(encoded_samples)
 
     emotions_final = []
     for i in range(len(label_probs)):
