@@ -273,18 +273,42 @@ if __name__ == "__main__":
 
     model, callbacks_list = EmotionClassifierModel(N_EMB, N_SEQ, word2idx, label2idx, embedding_matrix)
 
-    x_train=[]
-    y_train=[]
-    x_valid=[]
-    y_valid=[]
-
+    # Encode input words and labels
+    x_train = [] #[word2idx[word] for word in sentence] for sentence in ]
+    y_train = [] #[label2idx[label] for label in labels]
     for inst in train_dataset.insts:
-        x_train.append(inst.words)
-        y_train.append(inst.label)
+        ids_word = []
+        ids_label = []
+        for word in inst.words:
+            ids_word += word2idx[word]
+        for label in inst.label:
+            ids_label += label2idx[label]
+        x_train.append(ids_word)
+        y_train.append(ids_label)
 
+    # Encode input words and labels
+    x_valid= [] #[word2idx[word] for word in sentence] for sentence in ]
+    y_valid = [] #[label2idx[label] for label in labels]
     for inst in valid_dataset.insts:
-        x_valid.append(inst.words)
-        y_valid.append(inst.label)
+        ids_word = []
+        ids_label = []
+        for word in inst.words:
+            ids_word += word2idx[word]
+        for label in inst.label:
+            ids_label += label2idx[label]
+        x_valid.append(ids_word)
+        y_valid.append(ids_label)
+
+    # # Apply Padding to X
+    # from keras.preprocessing.sequence import pad_sequences
+    #
+    # X = pad_sequences(X, max_words)
+
+    # Convert Y to numpy array
+    y_train = keras.utils.to_categorical(y_train, num_classes=len(label2idx), dtype='float32')
+
+    # Convert Y to numpy array
+    y_valid = keras.utils.to_categorical(y_valid, num_classes=len(label2idx), dtype='float32')
 
     # Train model
     model.fit(x_train, y_train, validation_data=(x_valid, y_valid), batch_size=BATCH_SIZE,
