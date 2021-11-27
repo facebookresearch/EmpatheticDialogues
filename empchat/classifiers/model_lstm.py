@@ -5,11 +5,11 @@ import numpy as np
 from tqdm import tqdm
 import time
 import datetime
-import random
-import math
 import keras
 from keras.callbacks import ModelCheckpoint
 from keras.layers import Embedding
+from keras.preprocessing.sequence import pad_sequences
+from keras.models import load_model
 
 from sklearn.preprocessing import LabelEncoder
 # import torch
@@ -17,8 +17,6 @@ from sklearn.preprocessing import LabelEncoder
 # import torch.nn.functional as F
 # import time
 # import torch.optim as optim
-
-
 
 # class EmotionClassifierModel(nn.Module):
 #     def __init__(self, vocab_size, embedding_dim, hidden_dim, output_dim, dropout=0.2):
@@ -209,6 +207,8 @@ def EmotionClassifierModel(N_EMB, N_SEQ, word2idx, label2idx, embedding_matrix):
     return model, callbacks_list
 
 if __name__ == "__main__":
+    start_time = time.time()
+
     from .data_loader import EmotionDataset
     # from torch.utils.data import DataLoader
     from .utils import build_word_idx
@@ -260,7 +260,7 @@ if __name__ == "__main__":
     # Maps each word in our vocab to it's embedded representation, if the word is present in the GloVe embeddings
     embedding_matrix = np.zeros((N_vocab, N_EMB))
     n_match = 0
-    print(len(word2idx))
+
     for word, i in word2idx.items():
         embedding_vector = embeddings_index.get(word)
         if embedding_vector is not None:
@@ -269,62 +269,82 @@ if __name__ == "__main__":
         else:
             embedding_matrix[i] = np.random.normal(0, 1, (N_EMB,))
     print("Vocabulary match: ", n_match)
-    print(len(embedding_matrix))
-
-    model, callbacks_list = EmotionClassifierModel(N_EMB, N_SEQ, word2idx, label2idx, embedding_matrix)
 
     # Encode input words and labels
-    x_train = [] #[word2idx[word] for word in sentence] for sentence in ]
+    x_train = [] #[word2idx[word] for word in sentence] for sentence in train_dataset]
     y_train = [] #[label2idx[label] for label in labels]
     for inst in train_dataset.insts:
         ids_word = []
         ids_label = []
         for word in inst.words:
             ids_word.append(word2idx[word])
-        for label in inst.label:
-            ids_label.append(label2idx[label])
+        ids_label.append(label2idx[inst.label])
         x_train.append(ids_word)
         y_train.append(ids_label)
 
     # Encode input words and labels
-    x_valid= [] #[word2idx[word] for word in sentence] for sentence in ]
+    x_valid= [] #[word2idx[word] for word in sentence] for sentence in train_dataset]
     y_valid = [] #[label2idx[label] for label in labels]
     for inst in valid_dataset.insts:
         ids_word = []
         ids_label = []
         for word in inst.words:
             ids_word.append(word2idx[word])
-        for label in inst.label:
-            ids_label.append(label2idx[label])
+        ids_label.append(label2idx[inst.label])
         x_valid.append(ids_word)
         y_valid.append(ids_label)
 
-    # # Apply Padding to X
-    # from keras.preprocessing.sequence import pad_sequences
-    #
-    # X = pad_sequences(X, max_words)
+    # Apply Padding to X
+    x_train = pad_sequences(x_train, N_SEQ)
+    x_valid = pad_sequences(x_valid, N_SEQ)
+
+    # Convert X to numpy array
+    x_train = np.array(x_train)
+    x_valid = np.array(x_valid)
 
     # Convert Y to numpy array
     y_train = keras.utils.to_categorical(y_train, num_classes=len(label2idx), dtype='float32')
-
-    # Convert Y to numpy array
     y_valid = keras.utils.to_categorical(y_valid, num_classes=len(label2idx), dtype='float32')
+
+    model, callbacks_list = EmotionClassifierModel(N_EMB, N_SEQ, word2idx, label2idx, embedding_matrix)
 
     # Train model
     model.fit(x_train, y_train, validation_data=(x_valid, y_valid), batch_size=BATCH_SIZE,
-              epochs=N_EPOCHS, callbacks=callbacks_list)
+              epochs=1)  # add callbacks=callbacks_list as another parameter later
+
+    model.save("models/lstm_attention_v1_trained.h5")
+
+    # model = load_model("models/lstm_attention_v1_trained.h5")
+
+    end_time = time.time()
+    print("Time taken to train the model", (end_time - start_time))
 
     # Re-create the model to get attention vectors as well as label prediction
     model_with_attentions = keras.Model(inputs=model.input,
                                         outputs=[model.output,
                                                  model.get_layer('attention_vec').output])
-    encoded_samples = [[word2idx[word] for word in valid_dataset]]
+
+    encoded_samples = [] # encoded_samples = [[word2idx[word] for word in valid_dataset]]
+    for inst in valid_dataset.insts:
+        ids_word = []
+        for word in inst.words:
+            ids_word.append(word2idx[word])
+        encoded_samples.append(ids_word)
+
+    # Apply Padding
+    encoded_samples = pad_sequences(encoded_samples, N_SEQ)
+
+    # Convert to numpy array
+    encoded_samples = np.array(encoded_samples)
+
     # Make predictions
     label_probs, attentions = model_with_attentions.predict(encoded_samples)
     label_probs = {idx2labels[_id]: prob for (label, _id), prob in zip(label2idx.items(), label_probs[0])}
     emotions = [label for label, _ in label_probs.items()]
     scores = [score for _, score in label_probs.items()]
 
+    print(emotions)
+    print(scores)
 
     # Convert to torch tensor to be used directly in the embedding layer:
     # embeddings_tensor = torch.LongTensor(embedding_matrix).to(device)
