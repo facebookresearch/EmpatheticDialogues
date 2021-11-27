@@ -207,7 +207,7 @@ def EmotionClassifierModel(N_EMB, N_SEQ, word2idx, label2idx, embedding_matrix):
     return model, callbacks_list
 
 if __name__ == "__main__":
-    start_time = time.time()
+    # start_time = time.time()
 
     from .data_loader import EmotionDataset
     # from torch.utils.data import DataLoader
@@ -307,17 +307,17 @@ if __name__ == "__main__":
     y_valid = keras.utils.to_categorical(y_valid, num_classes=len(label2idx), dtype='float32')
 
     model, callbacks_list = EmotionClassifierModel(N_EMB, N_SEQ, word2idx, label2idx, embedding_matrix)
+    #
+    # # Train model
+    # model.fit(x_train, y_train, validation_data=(x_valid, y_valid), batch_size=BATCH_SIZE,
+    #           epochs=1)  # add callbacks=callbacks_list as another parameter later
+    #
+    # model.save("models/lstm_v1_trained.h5")
 
-    # Train model
-    model.fit(x_train, y_train, validation_data=(x_valid, y_valid), batch_size=BATCH_SIZE,
-              epochs=1)  # add callbacks=callbacks_list as another parameter later
+    model = load_model("models/lstm_v1_trained.h5", compile=False)
 
-    model.save("models/lstm_v1_trained.h5")
-
-    # model = load_model("models/lstm_v1_trained.h5", compile=False)
-
-    end_time = time.time()
-    print("Time taken to train the model", (end_time - start_time))
+    # end_time = time.time()
+    # print("Time taken to train the model", (end_time - start_time))
 
     encoded_samples = [] # encoded_samples = [[word2idx[word] for word in valid_dataset]]
     for inst in valid_dataset.insts:
