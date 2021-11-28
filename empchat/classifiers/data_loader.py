@@ -3,16 +3,10 @@ from typing import List, Dict
 from torch.utils.data import Dataset
 import collections
 import re
-import numpy as np
-import torch
-
-from torch._six import container_abcs, string_classes, int_classes
 
 from .utils import UNK, PAD
-from .utils import build_label_idx, check_all_labels_in_dict, check_all_obj_is_None
+from .utils import build_label_idx, check_all_labels_in_dict
 from .instance import Instance
-
-from empchat.datasets.loader import pad
 
 Feature = collections.namedtuple('Feature',
                                  'words seq_len label')
@@ -24,58 +18,10 @@ default_collate_err_msg_format = (
     "dicts or lists; found {}")
 
 
-def default_collate(batch):
-    r"""Puts each data field into a tensor with outer dimension batch size"""
-
-    elem = batch[0]
-    elem_type = type(elem)
-    if isinstance(elem, torch.Tensor):
-        out = None
-        # TODO 2: giving issues
-        # if torch.utils.data.get_worker_info() is not None:
-        #     # If we're in a background process, concatenate directly into a
-        #     # shared memory tensor to avoid an extra copy
-        #     numel = sum([x.numel() for x in batch])
-        #     storage = elem.storage()._new_shared(numel)
-        #     out = elem.new(storage)
-        return torch.stack(batch, 0, out=out)
-    elif elem_type.__module__ == 'numpy' and elem_type.__name__ != 'str_' \
-            and elem_type.__name__ != 'string_':
-        if elem_type.__name__ == 'ndarray' or elem_type.__name__ == 'memmap':
-            # array of string classes and object
-            if np_str_obj_array_pattern.search(elem.dtype.str) is not None:
-                raise TypeError(default_collate_err_msg_format.format(elem.dtype))
-
-            return default_collate([torch.as_tensor(b) for b in batch])
-        elif elem.shape == ():  # scalars
-            return torch.as_tensor(batch)
-    elif isinstance(elem, float):
-        return torch.tensor(batch, dtype=torch.float64)
-    elif isinstance(elem, int_classes):
-        return torch.tensor(batch)
-    elif isinstance(elem, string_classes):
-        return batch
-    elif isinstance(elem, container_abcs.Mapping):
-        return {key: default_collate([d[key] for d in batch]) for key in elem}
-    elif isinstance(elem, tuple) and hasattr(elem, '_fields'):  # namedtuple
-        return elem_type(*(default_collate(samples) for samples in zip(*batch)))
-    elif isinstance(elem, container_abcs.Sequence):
-        # check to make sure that the elements in batch have consistent size
-        it = iter(batch)
-        elem_size = len(next(it))
-        if not all(len(elem) == elem_size for elem in it):
-            raise RuntimeError('each element in list of batch should be of equal size')
-        transposed = zip(*batch)
-        return [default_collate(samples) for samples in transposed]
-
-    raise TypeError(default_collate_err_msg_format.format(elem_type))
-
-
 class EmotionDataset(Dataset):
     def __init__(self, file: str,
                  is_train: bool,
                  tokenizer,
-                 max_seq_len: int,
                  replace_digits=False,
                  label2idx: Dict[str, int] = None):
         """
@@ -83,7 +29,6 @@ class EmotionDataset(Dataset):
         """
         # read all the instances. sentences and labels
         self.tokenizer = tokenizer
-        self.max_seq_len = max_seq_len
         insts = self.read_txt(file, replace_digits)
         self.insts = insts
         if is_train:
@@ -121,19 +66,6 @@ class EmotionDataset(Dataset):
                 )
             )
 
-    def batchify(self, batch):
-        for i, feature in enumerate(batch):
-            padding_length = self.max_seq_len - len(feature.words)
-            words = feature.words + [0] * padding_length
-            label = feature.label if feature.label is not None else None
-
-            batch[i] = Feature(words=np.asarray(words), seq_len=feature.seq_len, label=label)
-
-        results = Feature(
-            *(default_collate(samples) if not check_all_obj_is_None(samples) else None for samples in zip(*batch))
-        )
-        return results
-
     def read_txt(self, file: str, replace_digits) -> List[Instance]:
         print(f"[Data Info] Reading file: {file}")
         insts = []
@@ -146,7 +78,7 @@ class EmotionDataset(Dataset):
                 if replace_digits:
                     sentence = re.sub('\d', '0', sentence)
                 # convert sentence to words, tokenize
-                words = self.tokenizer(sentence)[:self.max_seq_len]
+                words = self.tokenizer(sentence)
                 label = sparts[2]
                 insts.append(Instance(sentence, words, label))
         print("number of sentences: {}".format(len(insts)))
@@ -157,35 +89,3 @@ class EmotionDataset(Dataset):
 
     def __getitem__(self, index):
         return self.inst_ids[index]
-
-    # check def batchify
-    # fix logic, mostly not supported in older versions
-    # removed comment from below
-    # def collate_fn(self, batch: List[Feature]):
-    #     word_seq_lens = [len(feature.words) for feature in batch]
-    #     max_seq_len = max(word_seq_lens)
-    #     max_char_seq_len = -1
-    #     for feature in batch:
-    #         curr_max_char_seq_len = max(feature.char_seq_lens)
-    #         max_char_seq_len = max(curr_max_char_seq_len, max_char_seq_len)
-    #     for i, feature in enumerate(batch):
-    #         padding_length = max_seq_len - len(feature.words)
-    #         words = feature.words + [0] * padding_length
-    #         chars = []
-    #         char_seq_lens = feature.char_seq_lens + [1] * padding_length
-    #         for word_idx in range(feature.word_seq_len):
-    #             pad_char_length = max_char_seq_len - feature.char_seq_lens[word_idx]
-    #             word_chars = feature.chars[word_idx] + [0] * pad_char_length
-    #             chars.append(word_chars)
-    #         for _ in range(max_seq_len - feature.word_seq_len):
-    #             chars.append([0] * max_char_seq_len)
-    #         labels = feature.labels + [0] * padding_length if feature.labels is not None else None
-    # 
-    #         batch[i] = Feature(words=np.asarray(words),
-    #                            chars=np.asarray(chars), char_seq_lens=np.asarray(char_seq_lens),
-    #                            context_emb=feature.context_emb,
-    #                            word_seq_len=feature.word_seq_len,
-    #                            labels=np.asarray(labels) if labels is not None else None)
-    #     results = Feature(
-    #         *(default_collate(samples) if not check_all_obj_is_None(samples) else None for samples in zip(*batch)))
-    #     return results

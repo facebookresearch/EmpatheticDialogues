@@ -10,7 +10,7 @@ download empathetic dialogues dataset and put it in `data/` directory
 
 `conda install numpy=1.14.3`
 
-`conda install pytorch==1.4.0 torchvision==0.5.0 cpuonly -c pytorch`
+`conda install pytorch-cpu==1.0.1 torchvision-cpu==0.2.2 cpuonly -c pytorch`
 
 
 `pip install tqdm==4.19.7`
@@ -24,3 +24,13 @@ download empathetic dialogues dataset and put it in `data/` directory
 `pip install pytorch-pretrained-bert==0.5.1`
 
 Set environment variable to select EMO classifier model `EMO_MODEL=fast(default)|lstm|attn|trans`
+
+
+2nd environment
+`pip install tqdm==4.19.7`
+
+`pip install tensorflow==2.0.0`
+
+`pip install keras==2.3.1`
+
+`pip install pytorch-pretrained-bert==0.5.1`

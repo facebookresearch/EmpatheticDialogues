@@ -13,8 +13,8 @@ def build_label_idx(insts: List[Instance]) -> Tuple[List[str], Dict[str, int]]:
     """
     label2idx = {}
     idx2labels = []
-    label2idx[PAD] = len(label2idx)
-    idx2labels.append(PAD)
+    # label2idx[PAD] = len(label2idx)
+    # idx2labels.append(PAD)
     for inst in insts:
         if inst.label not in label2idx:
             idx2labels.append(inst.label)
