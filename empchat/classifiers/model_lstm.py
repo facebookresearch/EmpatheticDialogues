@@ -1,10 +1,10 @@
 from empchat.datasets.tokens import get_bert_token_mapping
-from empchat.classifiers.utils import build_label_idx, PAD, build_word_idx
+from empchat.classifiers.utils import build_label_idx, PAD, build_word_idx, predict_and_save_json
 from empchat.classifiers.data_loader import EmotionDataset
 
 import numpy as np
 from tqdm import tqdm
-import json
+import os
 
 from pytorch_pretrained_bert import BertTokenizer
 import tensorflow as tf
@@ -15,7 +15,7 @@ from keras.models import load_model
 from keras.callbacks import ModelCheckpoint
 
 
-def EmotionClassifierModel(N_EMB, N_SEQ, word2idx, label2idx, embedding_matrix):
+def EmotionClassifierModel(N_EMB, N_SEQ, word2idx, label2idx, embedding_matrix, filepath):
     # Define input tensor
     # Replace max-words,
     sequence_input = keras.Input(shape=(N_SEQ,), dtype='int32')
@@ -49,8 +49,7 @@ def EmotionClassifierModel(N_EMB, N_SEQ, word2idx, label2idx, embedding_matrix):
     model.summary()
 
     # define the checkpoint
-    filepath = "models/lstm_v1_trained/lstm_v1_trained-{epoch:02d}-{val_acc:.6f}.hdf5"
-    checkpoint = ModelCheckpoint(filepath, monitor='val_acc', verbose=1, save_best_only=True, mode='max')
+    checkpoint = ModelCheckpoint(filepath, monitor='val_accuracy', verbose=1, save_best_only=True, mode='max')
     callbacks_list = [checkpoint]
 
     return model, callbacks_list
@@ -67,6 +66,7 @@ if __name__ == "__main__":
     N_EPOCHS = 100
     SEED = 42
     TRAIN = True
+    filepath = "models/lstm_v1_trained.h5"
 
     np.random.seed(SEED)
     tf.random.set_seed(SEED)
@@ -168,40 +168,17 @@ if __name__ == "__main__":
     y_valid = keras.utils.to_categorical(y_valid, num_classes=len(label2idx), dtype='float32')
     y_test = keras.utils.to_categorical(y_test, num_classes=len(label2idx), dtype='float32')
 
-    model, callbacks_list = EmotionClassifierModel(N_EMB, N_SEQ, word2idx, label2idx, embedding_matrix)
+    model, callbacks_list = EmotionClassifierModel(N_EMB, N_SEQ, word2idx, label2idx, embedding_matrix, filepath)
 
     if TRAIN:
         # Train model
         model.fit(x_train, y_train, validation_data=(x_valid, y_valid), batch_size=BATCH_SIZE,
                   epochs=N_EPOCHS, callbacks=callbacks_list)
 
-    # model = load_model("models/lstm_v1_trained.h5", compile=False)
+    model = load_model(filepath, compile=False)
 
-    encoded_samples = []  # encoded_samples = [[word2idx[word] for word in valid_dataset]]
-    for inst in test_dataset.insts:
-        ids_word = []
-        for word in inst.words:
-            ids_word.append(word2idx[word])
-        encoded_samples.append(ids_word)
+    os.makedirs("data/lstm/test_lstm.json", exist_ok=True)
 
-    # Apply Padding
-    encoded_samples = pad_sequences(encoded_samples, N_SEQ, value=word2idx[PAD])
-
-    # Convert to numpy array
-    encoded_samples = np.array(encoded_samples)
-
-    # Make predictions
-    label_probs = model.predict(encoded_samples, batch_size=BATCH_SIZE)
-
-    emotions_final = []
-    emotions_dict = dict()
-    for i in range(len(label_probs)):
-        idx = np.argmax(label_probs[i])
-        emotion_final = idx2labels[idx]
-        emotions_final.append(emotion_final)
-        emotions_dict[test_dataset.insts[i]] = emotion_final
-
-    json.dump(emotions_dict, open("data/test_lstm.json", "w"))
-
-    print(emotions_final)
-    print(len(emotions_final))
+    predict_and_save_json(model, train_dataset.insts, word2idx, idx2labels, N_SEQ, "data/lstm/train.json", BATCH_SIZE)
+    predict_and_save_json(model, valid_dataset.insts, word2idx, idx2labels, N_SEQ, "data/lstm/valid.json", BATCH_SIZE)
+    predict_and_save_json(model, test_dataset.insts, word2idx, idx2labels, N_SEQ, "data/lstm/test.json", BATCH_SIZE)

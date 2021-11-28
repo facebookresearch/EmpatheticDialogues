@@ -1,6 +1,11 @@
 from typing import List, Tuple, Dict
 from .instance import Instance
 
+import numpy as np
+import json
+
+from keras.preprocessing.sequence import pad_sequences
+
 PAD = "<PAD>"
 UNK = "<UNK>"
 
@@ -13,8 +18,6 @@ def build_label_idx(insts: List[Instance]) -> Tuple[List[str], Dict[str, int]]:
     """
     label2idx = {}
     idx2labels = []
-    # label2idx[PAD] = len(label2idx)
-    # idx2labels.append(PAD)
     for inst in insts:
         if inst.label not in label2idx:
             idx2labels.append(inst.label)
@@ -80,3 +83,29 @@ def check_all_obj_is_None(objs):
         if obj is not None:
             return False
     return [None] * len(objs)
+
+
+def predict_and_save_json(model, insts: List[Instance], word2idx, idx2labels, N_SEQ, file_name, batch_size):
+    encoded_samples = []  # encoded_samples = [[word2idx[word] for word in valid_dataset]]
+    for inst in insts:
+        ids_word = []
+        for word in inst.words:
+            ids_word.append(word2idx[word])
+        encoded_samples.append(ids_word)
+
+    # Apply Padding
+    encoded_samples = pad_sequences(encoded_samples, N_SEQ, value=word2idx[PAD])
+
+    # Convert to numpy array
+    encoded_samples = np.array(encoded_samples)
+
+    # Make predictions
+    label_probs = model.predict(encoded_samples, batch_size=batch_size)
+
+    emotions_dict = dict()
+    for i in range(len(label_probs)):
+        idx = np.argmax(label_probs[i])
+        emotion_final = idx2labels[idx]
+        emotions_dict[insts[i].ori_sentence] = emotion_final
+
+    json.dump(emotions_dict, open(file_name, "w"))
