@@ -122,3 +122,24 @@ def bert_predict_and_save_json(model, insts: List[Instance], encoded_samples, id
         emotions_dict[insts[i].ori_sentence] = emotion_final
 
     json.dump(emotions_dict, open(file_name, "w"))
+
+
+def create_x_y_lstm(insts: List[Instance], max_length, word2idx, label2idx, shuffle=False):
+    if shuffle:
+        np.random.shuffle(insts)
+    x = []
+    y = []
+    for inst in insts:
+        ids_word = []
+        ids_label = []
+        for word in inst.words:
+            ids_word.append(word2idx[word])
+        ids_label.append(label2idx[inst.label])
+        x.append(ids_word)
+        y.append(ids_label)
+
+    x = pad_sequences(x, max_length, value=word2idx[PAD])
+    x = np.array(x)
+    from keras.utils import to_categorical
+    y = to_categorical(y, num_classes=len(label2idx), dtype='float32')
+    return x, y

@@ -1,5 +1,5 @@
 from empchat.datasets.tokens import get_bert_token_mapping
-from empchat.classifiers.utils import build_label_idx, PAD, build_word_idx, predict_and_save_json
+from empchat.classifiers.utils import build_label_idx, create_x_y_lstm, build_word_idx, predict_and_save_json
 from empchat.classifiers.data_loader import EmotionDataset
 
 import numpy as np
@@ -9,7 +9,6 @@ import os
 from pytorch_pretrained_bert import BertTokenizer
 import tensorflow as tf
 import keras
-from keras.preprocessing.sequence import pad_sequences
 from keras.layers import Embedding
 from keras.models import load_model
 from keras.callbacks import ModelCheckpoint, EarlyStopping
@@ -130,56 +129,8 @@ if __name__ == "__main__":
     print("Vocabulary match: ", n_match)
 
     # Encode input words and labels
-    x_train = []  # [word2idx[word] for word in sentence] for sentence in train_dataset]
-    y_train = []  # [label2idx[label] for label in labels]
-    np.random.shuffle(train_dataset.insts)
-    for inst in train_dataset.insts:
-        ids_word = []
-        ids_label = []
-        for word in inst.words:
-            ids_word.append(word2idx[word])
-        ids_label.append(label2idx[inst.label])
-        x_train.append(ids_word)
-        y_train.append(ids_label)
-
-    # Encode input words and labels
-    x_valid = []  # [word2idx[word] for word in sentence] for sentence in train_dataset]
-    y_valid = []  # [label2idx[label] for label in labels]
-    for inst in valid_dataset.insts:
-        ids_word = []
-        ids_label = []
-        for word in inst.words:
-            ids_word.append(word2idx[word])
-        ids_label.append(label2idx[inst.label])
-        x_valid.append(ids_word)
-        y_valid.append(ids_label)
-
-    # Encode input words and labels
-    x_test = []  # [word2idx[word] for word in sentence] for sentence in train_dataset]
-    y_test = []  # [label2idx[label] for label in labels]
-    for inst in test_dataset.insts:
-        ids_word = []
-        ids_label = []
-        for word in inst.words:
-            ids_word.append(word2idx[word])
-        ids_label.append(label2idx[inst.label])
-        x_test.append(ids_word)
-        y_test.append(ids_label)
-
-    # Apply Padding to X
-    x_train = pad_sequences(x_train, N_SEQ)
-    x_valid = pad_sequences(x_valid, N_SEQ)
-    x_test = pad_sequences(x_test, N_SEQ)
-
-    # Convert X to numpy array
-    x_train = np.array(x_train)
-    x_valid = np.array(x_valid)
-    x_test = np.array(x_test)
-
-    # Convert Y to numpy array
-    y_train = keras.utils.to_categorical(y_train, num_classes=len(label2idx), dtype='float32')
-    y_valid = keras.utils.to_categorical(y_valid, num_classes=len(label2idx), dtype='float32')
-    y_test = keras.utils.to_categorical(y_test, num_classes=len(label2idx), dtype='float32')
+    x_train, y_train = create_x_y_lstm(train_dataset.insts, word2idx, label2idx, len(label2idx), True)
+    x_valid, y_valid = create_x_y_lstm(train_dataset.insts, word2idx, label2idx, len(label2idx))
 
     model, callbacks_list = EmotionClassifierModel(N_EMB, N_SEQ, word2idx, label2idx, embedding_matrix, filepath)
 
@@ -198,3 +149,11 @@ if __name__ == "__main__":
                           "data/attn/valid%s.json" % LABEL_SUFFIX, BATCH_SIZE)
     predict_and_save_json(model, test_dataset.insts, word2idx, idx2labels, N_SEQ,
                           "data/attn/test%s.json" % LABEL_SUFFIX, BATCH_SIZE)
+
+    # history 4 predictions
+    predict_and_save_json(model, train_dataset.hist_insts, word2idx, idx2labels, N_SEQ,
+                          "data/lstm/train%s-4.json" % LABEL_SUFFIX, BATCH_SIZE)
+    predict_and_save_json(model, valid_dataset.hist_insts, word2idx, idx2labels, N_SEQ,
+                          "data/lstm/valid%s-4.json" % LABEL_SUFFIX, BATCH_SIZE)
+    predict_and_save_json(model, test_dataset.hist_insts, word2idx, idx2labels, N_SEQ,
+                          "data/lstm/test%s-4.json" % LABEL_SUFFIX, BATCH_SIZE)
