@@ -31,7 +31,7 @@ def EmotionClassifierModel(label2idx, filepath):
     # checkpoint = ModelCheckpoint(filepath, monitor='val_accuracy', verbose=1, save_best_only=True, mode='max')
     es = EarlyStopping(monitor='val_loss', patience=15)
     callbacks_list = [
-        # checkpoint, 
+        # checkpoint,
         es
     ]
 
@@ -41,10 +41,10 @@ def EmotionClassifierModel(label2idx, filepath):
 if __name__ == "__main__":
 
     # TODO 5: set from CMD
-    BATCH_SIZE = 16
-    N_EMB = 100
+    BATCH_SIZE = 64
+    # N_EMB = 100
     N_SEQ = 160
-    HIDDEN_DIM = 64
+    # HIDDEN_DIM = 64
     N_EPOCHS = 100
     SEED = 42
     TRAIN = True
