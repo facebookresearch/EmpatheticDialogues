@@ -133,7 +133,10 @@ def create_x_y_lstm(insts: List[Instance], max_length, word2idx, label2idx, shuf
         ids_word = []
         ids_label = []
         for word in inst.words:
-            ids_word.append(word2idx[word])
+            if word in word2idx:
+                ids_word.append(word2idx[word])
+            else:
+                ids_word.append(word2idx[UNK])
         ids_label.append(label2idx[inst.label])
         x.append(ids_word)
         y.append(ids_label)

@@ -121,8 +121,8 @@ if __name__ == "__main__":
     print("Vocabulary match: ", n_match)
 
     # Encode input words and labels
-    x_train, y_train = create_x_y_lstm(train_dataset.insts, word2idx, label2idx, len(label2idx), True)
-    x_valid, y_valid = create_x_y_lstm(train_dataset.insts, word2idx, label2idx, len(label2idx))
+    x_train, y_train = create_x_y_lstm(train_dataset.insts, N_SEQ, word2idx, label2idx, True)
+    x_valid, y_valid = create_x_y_lstm(train_dataset.insts, N_SEQ, word2idx, label2idx, )
 
     model, callbacks_list = EmotionClassifierModel(N_EMB, N_SEQ, word2idx, label2idx, embedding_matrix, filepath)
 
