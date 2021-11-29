@@ -109,3 +109,16 @@ def predict_and_save_json(model, insts: List[Instance], word2idx, idx2labels, N_
         emotions_dict[insts[i].ori_sentence] = emotion_final
 
     json.dump(emotions_dict, open(file_name, "w"))
+
+
+def bert_predict_and_save_json(model, insts: List[Instance], encoded_samples, idx2labels, file_name, batch_size):
+    # Make predictions
+    label_probs = model.predict(encoded_samples, batch_size=batch_size)
+
+    emotions_dict = dict()
+    for i in range(len(label_probs)):
+        idx = np.argmax(label_probs[i])
+        emotion_final = idx2labels[idx]
+        emotions_dict[insts[i].ori_sentence] = emotion_final
+
+    json.dump(emotions_dict, open(file_name, "w"))

@@ -12,7 +12,7 @@ import keras
 from keras.preprocessing.sequence import pad_sequences
 from keras.layers import Embedding
 from keras.models import load_model
-from keras.callbacks import ModelCheckpoint
+from keras.callbacks import ModelCheckpoint, EarlyStopping
 
 
 def EmotionClassifierModel(N_EMB, N_SEQ, word2idx, label2idx, embedding_matrix, filepath):
@@ -57,8 +57,9 @@ def EmotionClassifierModel(N_EMB, N_SEQ, word2idx, label2idx, embedding_matrix, 
     model.summary()
 
     # define the checkpoint
-    checkpoint = ModelCheckpoint(filepath, monitor='val_acc', verbose=1, save_best_only=True, mode='max')
-    callbacks_list = [checkpoint]
+    checkpoint = ModelCheckpoint(filepath, monitor='val_accuracy', verbose=1, save_best_only=True, mode='max')
+    es = EarlyStopping(monitor='val_loss', patience=15)
+    callbacks_list = [checkpoint, es]
 
     return model, callbacks_list
 

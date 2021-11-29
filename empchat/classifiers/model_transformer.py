@@ -1,5 +1,5 @@
 from empchat.datasets.tokens import get_bert_token_mapping
-from empchat.classifiers.utils import build_label_idx, predict_and_save_json
+from empchat.classifiers.utils import build_label_idx, bert_predict_and_save_json
 from empchat.classifiers.data_loader import EmotionDataset
 
 import numpy as np
@@ -9,7 +9,7 @@ from pytorch_pretrained_bert import BertTokenizer
 import tensorflow as tf
 import keras
 from keras.models import load_model
-from keras.callbacks import ModelCheckpoint
+from keras.callbacks import ModelCheckpoint, EarlyStopping
 
 from transformers import TFAutoModelForSequenceClassification, BertTokenizerFast, IntervalStrategy
 from transformers import TFTrainer, TFTrainingArguments
@@ -28,8 +28,12 @@ def EmotionClassifierModel(label2idx, filepath):
     # model.compile(loss=model.compute_loss, metrics=["accuracy"], optimizer='adam')
 
     # define the checkpoint
-    checkpoint = ModelCheckpoint(filepath, monitor='val_accuracy', verbose=1, save_best_only=True, mode='max')
-    callbacks_list = [checkpoint]
+    # checkpoint = ModelCheckpoint(filepath, monitor='val_accuracy', verbose=1, save_best_only=True, mode='max')
+    es = EarlyStopping(monitor='val_loss', patience=15)
+    callbacks_list = [
+        # checkpoint, 
+        es
+    ]
 
     return model, callbacks_list
 
@@ -90,11 +94,22 @@ if __name__ == "__main__":
         y_valid.append(label2idx[inst.label])
         x_valid.append(inst.ori_sentence)
 
+    # Encode input words and labels
+    x_test = []  # [word2idx[word] for word in sentence] for sentence in train_dataset]
+    y_test = []  # [label2idx[label] for label in labels]
+    for inst in test_dataset.insts:
+        # ids_label = []
+        # ids_label.append(label2idx[inst.label])
+        # y_test.append(ids_label)
+        y_test.append(label2idx[inst.label])
+        x_test.append(inst.ori_sentence)
+
     # Apply Padding to X
     tokenizer = BertTokenizerFast.from_pretrained(model_name)
 
     x_train = tokenizer(x_train, truncation=True, padding=True, max_length=N_SEQ, return_tensors="tf")
     x_valid = tokenizer(x_valid, truncation=True, padding=True, max_length=N_SEQ, return_tensors="tf")
+    x_test = tokenizer(x_test, truncation=True, padding=True, max_length=N_SEQ, return_tensors="tf")
 
     # Convert Y to numpy array
     # y_train = keras.utils.to_categorical(y_train, num_classes=len(label2idx), dtype='float32')
@@ -108,6 +123,11 @@ if __name__ == "__main__":
     valid_ds = tf.data.Dataset.from_tensor_slices((
         dict(x_valid),
         y_valid
+    ))
+
+    test_ds = tf.data.Dataset.from_tensor_slices((
+        dict(x_test),
+        y_test
     ))
 
     # from IPython import embed
@@ -135,4 +155,11 @@ if __name__ == "__main__":
         model.fit(train_ds.batch(BATCH_SIZE), validation_data=valid_ds.batch(BATCH_SIZE), batch_size=BATCH_SIZE,
                   epochs=1, callbacks=callbacks_list)
         model.save_pretrained(filepath)
-    model = load_model(filepath, compile=False)
+
+    model = TFAutoModelForSequenceClassification.from_pretrained(filepath)
+
+    os.makedirs("data/trans/test_lstm.json", exist_ok=True)
+
+    bert_predict_and_save_json(model, train_dataset.insts, train_ds, idx2labels, "data/trans/train.json", BATCH_SIZE)
+    bert_predict_and_save_json(model, valid_dataset.insts, valid_ds, idx2labels, "data/trans/valid.json", BATCH_SIZE)
+    bert_predict_and_save_json(model, test_dataset.insts, test_ds, idx2labels, "data/trans/test.json", BATCH_SIZE)
