@@ -93,7 +93,8 @@ class EmpDataset(Dataset):
                 self.ftmodel = fasttext_module.FastText.load_model(fasttext_path)
             else:
                 from empchat.classifiers import get_classifier_model
-                self.ftmodel = get_classifier_model(emo_model_type, splitname)
+                label_suffix = os.getenv("LABEL_SUFFIX", "")
+                self.ftmodel = get_classifier_model(emo_model_type, splitname, label_suffix)
             newmaxlen += fasttext
             maxlen += fasttext
             if hasattr(dic, "bert_tokenizer"):

@@ -64,17 +64,15 @@ class EmotionDataset():
             if cparts[0] == sparts[0]:
                 prevsent = cparts[5].replace("_comma_", ",")
                 history.append(prevsent)
-                idx = int(sparts[1])
 
-                if (idx % 2) == 0:
-                    ori_sentence = " </s> ".join(history[-max_hist_len:])
-                    tmp_sentence = ori_sentence
-                    if replace_digits:
-                        tmp_sentence = re.sub('\d', '0', tmp_sentence)
-                    # convert sentence to words, tokenize
-                    words = self.tokenizer(tmp_sentence)
-                    label = sparts[2]
-                    hist_insts.append(Instance(ori_sentence, words, label))
+                ori_sentence = " </s> ".join(history[-max_hist_len:])
+                tmp_sentence = ori_sentence
+                if replace_digits:
+                    tmp_sentence = re.sub('\d', '0', tmp_sentence)
+                # convert sentence to words, tokenize
+                words = self.tokenizer(tmp_sentence)
+                label = sparts[2]
+                hist_insts.append(Instance(ori_sentence, words, label))
             else:
                 history = []
 
