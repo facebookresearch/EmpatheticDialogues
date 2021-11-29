@@ -43,12 +43,13 @@ if __name__ == "__main__":
     # TODO 5: set from CMD
     BATCH_SIZE = 64
     # N_EMB = 100
-    N_SEQ = 160
+    N_SEQ = 512
     # HIDDEN_DIM = 64
     N_EPOCHS = 100
     SEED = 42
     TRAIN = True
-    filepath = "models/bert_v1_trained.h5"
+    LABEL_SUFFIX = "_8"  # or ""
+    filepath = "models/bert%s.h5" % LABEL_SUFFIX
     # model_name = "bert-base-cased"
     model_name = "distilbert-base-cased"
 
@@ -65,9 +66,11 @@ if __name__ == "__main__":
     )
 
     # load data
-    train_dataset = EmotionDataset("data/train.csv", True, tokenizer.tokenize)
-    valid_dataset = EmotionDataset("data/valid.csv", False, tokenizer.tokenize, label2idx=train_dataset.label2idx)
-    test_dataset = EmotionDataset("data/test.csv", False, tokenizer.tokenize, label2idx=train_dataset.label2idx)
+    train_dataset = EmotionDataset("data/train%s.csv" % LABEL_SUFFIX, True, tokenizer.tokenize)
+    valid_dataset = EmotionDataset("data/valid%s.csv" % LABEL_SUFFIX, False, tokenizer.tokenize,
+                                   label2idx=train_dataset.label2idx)
+    test_dataset = EmotionDataset("data/test%s.csv" % LABEL_SUFFIX, False, tokenizer.tokenize,
+                                  label2idx=train_dataset.label2idx)
 
     idx2labels, label2idx = build_label_idx(
         train_dataset.insts
@@ -158,8 +161,11 @@ if __name__ == "__main__":
 
     model = TFAutoModelForSequenceClassification.from_pretrained(filepath)
 
-    os.makedirs("data/trans/test_lstm.json", exist_ok=True)
+    os.makedirs("data/trans/", exist_ok=True)
 
-    bert_predict_and_save_json(model, train_dataset.insts, train_ds, idx2labels, "data/trans/train.json", BATCH_SIZE)
-    bert_predict_and_save_json(model, valid_dataset.insts, valid_ds, idx2labels, "data/trans/valid.json", BATCH_SIZE)
-    bert_predict_and_save_json(model, test_dataset.insts, test_ds, idx2labels, "data/trans/test.json", BATCH_SIZE)
+    bert_predict_and_save_json(model, train_dataset.insts, train_ds, idx2labels,
+                               "data/trans/train%s.json" % LABEL_SUFFIX, BATCH_SIZE)
+    bert_predict_and_save_json(model, valid_dataset.insts, valid_ds, idx2labels,
+                               "data/trans/valid%s.json" % LABEL_SUFFIX, BATCH_SIZE)
+    bert_predict_and_save_json(model, test_dataset.insts, test_ds, idx2labels, "data/trans/test%s.json" % LABEL_SUFFIX,
+                               BATCH_SIZE)

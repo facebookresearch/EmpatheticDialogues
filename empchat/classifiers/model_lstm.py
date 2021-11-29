@@ -50,7 +50,7 @@ def EmotionClassifierModel(N_EMB, N_SEQ, word2idx, label2idx, embedding_matrix, 
 
     # define the checkpoint
     checkpoint = ModelCheckpoint(filepath, monitor='val_accuracy', verbose=1, save_best_only=True, mode='max')
-    es = EarlyStopping(monitor='val_loss', patience=15)
+    es = EarlyStopping(monitor='val_loss', patience=10)
     callbacks_list = [checkpoint, es]
 
     return model, callbacks_list
@@ -62,12 +62,13 @@ if __name__ == "__main__":
     BATCH_SIZE = 64
     GLOVE_FILE = "data/glove.6B.100d.txt"
     N_EMB = 100
-    N_SEQ = 160
+    N_SEQ = 512
     HIDDEN_DIM = 64
     N_EPOCHS = 100
     SEED = 42
     TRAIN = True
-    filepath = "models/lstm_v1_trained.h5"
+    LABEL_SUFFIX = "_8"  # or ""
+    filepath = "models/lstm%s.h5" % LABEL_SUFFIX
 
     np.random.seed(SEED)
     tf.random.set_seed(SEED)
@@ -82,9 +83,11 @@ if __name__ == "__main__":
     )
 
     # load data
-    train_dataset = EmotionDataset("data/train.csv", True, tokenizer.tokenize)
-    valid_dataset = EmotionDataset("data/valid.csv", False, tokenizer.tokenize, label2idx=train_dataset.label2idx)
-    test_dataset = EmotionDataset("data/test.csv", False, tokenizer.tokenize, label2idx=train_dataset.label2idx)
+    train_dataset = EmotionDataset("data/train%s.csv" % LABEL_SUFFIX, True, tokenizer.tokenize)
+    valid_dataset = EmotionDataset("data/valid%s.csv" % LABEL_SUFFIX, False, tokenizer.tokenize,
+                                   label2idx=train_dataset.label2idx)
+    test_dataset = EmotionDataset("data/test%s.csv" % LABEL_SUFFIX, False, tokenizer.tokenize,
+                                  label2idx=train_dataset.label2idx)
 
     word2idx, idx2word, char2idx, idx2char = build_word_idx(
         train_dataset.insts, valid_dataset.insts, test_dataset.insts
@@ -179,8 +182,11 @@ if __name__ == "__main__":
 
     model = load_model(filepath, compile=False)
 
-    os.makedirs("data/lstm/test_lstm.json", exist_ok=True)
+    os.makedirs("data/lstm/", exist_ok=True)
 
-    predict_and_save_json(model, train_dataset.insts, word2idx, idx2labels, N_SEQ, "data/lstm/train.json", BATCH_SIZE)
-    predict_and_save_json(model, valid_dataset.insts, word2idx, idx2labels, N_SEQ, "data/lstm/valid.json", BATCH_SIZE)
-    predict_and_save_json(model, test_dataset.insts, word2idx, idx2labels, N_SEQ, "data/lstm/test.json", BATCH_SIZE)
+    predict_and_save_json(model, train_dataset.insts, word2idx, idx2labels, N_SEQ,
+                          "data/lstm/train%s.json" % LABEL_SUFFIX, BATCH_SIZE)
+    predict_and_save_json(model, valid_dataset.insts, word2idx, idx2labels, N_SEQ,
+                          "data/lstm/valid%s.json" % LABEL_SUFFIX, BATCH_SIZE)
+    predict_and_save_json(model, test_dataset.insts, word2idx, idx2labels, N_SEQ,
+                          "data/lstm/test%s.json" % LABEL_SUFFIX, BATCH_SIZE)
