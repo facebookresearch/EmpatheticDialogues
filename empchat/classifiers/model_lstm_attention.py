@@ -69,7 +69,7 @@ if __name__ == "__main__":
     BATCH_SIZE = 16
     GLOVE_FILE = "data/glove.6B.100d.txt"
     N_EMB = 100
-    N_SEQ = 256
+    N_SEQ = 160
     HIDDEN_DIM = 64
     N_EPOCHS = 100
     SEED = 42
@@ -128,6 +128,7 @@ if __name__ == "__main__":
     # Encode input words and labels
     x_train = []  # [word2idx[word] for word in sentence] for sentence in train_dataset]
     y_train = []  # [label2idx[label] for label in labels]
+    np.random.shuffle(train_dataset.insts)
     for inst in train_dataset.insts:
         ids_word = []
         ids_label = []

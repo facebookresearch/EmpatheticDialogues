@@ -1,45 +1,55 @@
 from empchat.datasets.tokens import get_bert_token_mapping
-from empchat.classifiers.utils import build_label_idx
+from empchat.classifiers.utils import build_label_idx, predict_and_save_json
+from empchat.classifiers.data_loader import EmotionDataset
 
-import time
-import datetime
 import numpy as np
+import os
 
+from pytorch_pretrained_bert import BertTokenizer
+import tensorflow as tf
 import keras
-from keras.preprocessing.sequence import pad_sequences
+from keras.models import load_model
 from keras.callbacks import ModelCheckpoint
 
-from transformers import BertForSequenceClassification
-from transformers import Trainer, TrainingArguments
+from transformers import TFAutoModelForSequenceClassification, BertTokenizerFast, IntervalStrategy
+from transformers import TFTrainer, TFTrainingArguments
 
-def EmotionClassifierModel(label2idx):
-    model_name = "bert-base-uncased"
 
-    model = BertForSequenceClassification.from_pretrained(model_name, num_labels=len(label2idx))
+def EmotionClassifierModel(label2idx, filepath):
+    # model_name = "bert-base-cased"
+    model_name = "distilbert-base-cased"
 
-    st = datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S')
+    model = TFAutoModelForSequenceClassification.from_pretrained(model_name, num_labels=len(label2idx))
+    model.compile(
+        loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
+        metrics=["accuracy"],
+        optimizer='adam'
+    )
+    # model.compile(loss=model.compute_loss, metrics=["accuracy"], optimizer='adam')
+
     # define the checkpoint
-    filepath = "model_weights-improvement-{epoch:02d}-{val_acc:.6f}.hdf5"
-    checkpoint = ModelCheckpoint(filepath, monitor='val_acc', verbose=1, save_best_only=True, mode='max')
+    checkpoint = ModelCheckpoint(filepath, monitor='val_accuracy', verbose=1, save_best_only=True, mode='max')
     callbacks_list = [checkpoint]
 
     return model, callbacks_list
 
-if __name__ == "__main__":
-    start_time = time.time()
 
-    from .data_loader import EmotionDataset
-    # from torch.utils.data import DataLoader
-    from .utils import build_word_idx
-    from pytorch_pretrained_bert import BertTokenizer
+if __name__ == "__main__":
 
     # TODO 5: set from CMD
     BATCH_SIZE = 16
-    GLOVE_FILE = "data/glove.6B.100d.txt"
     N_EMB = 100
-    N_SEQ = 50
+    N_SEQ = 160
     HIDDEN_DIM = 64
     N_EPOCHS = 100
+    SEED = 42
+    TRAIN = True
+    filepath = "models/bert_v1_trained.h5"
+    # model_name = "bert-base-cased"
+    model_name = "distilbert-base-cased"
+
+    np.random.seed(SEED)
+    tf.random.set_seed(SEED)
 
     tokenizer = BertTokenizer.from_pretrained(
         "bert-base-cased",
@@ -51,74 +61,78 @@ if __name__ == "__main__":
     )
 
     # load data
-    train_dataset = EmotionDataset("data/train.csv", True, tokenizer.tokenize, N_SEQ)
-    valid_dataset = EmotionDataset("data/valid.csv", False, tokenizer.tokenize, N_SEQ,
-                                   label2idx=train_dataset.label2idx)
-    test_dataset = EmotionDataset("data/test.csv", False, tokenizer.tokenize, N_SEQ, label2idx=train_dataset.label2idx)
-
-    word2idx, idx2word, char2idx, idx2char = build_word_idx(
-        train_dataset.insts, valid_dataset.insts, test_dataset.insts
-    )
+    train_dataset = EmotionDataset("data/train.csv", True, tokenizer.tokenize)
+    valid_dataset = EmotionDataset("data/valid.csv", False, tokenizer.tokenize, label2idx=train_dataset.label2idx)
+    test_dataset = EmotionDataset("data/test.csv", False, tokenizer.tokenize, label2idx=train_dataset.label2idx)
 
     idx2labels, label2idx = build_label_idx(
         train_dataset.insts
     )
 
     # Encode input words and labels
-    x_train = [] #[word2idx[word] for word in sentence] for sentence in train_dataset]
-    y_train = [] #[label2idx[label] for label in labels]
+    x_train = []  # [word2idx[word] for word in sentence] for sentence in train_dataset]
+    y_train = []  # [label2idx[label] for label in labels]
+    np.random.shuffle(train_dataset.insts)
     for inst in train_dataset.insts:
-        ids_word = []
-        ids_label = []
-        for word in inst.words:
-            ids_word.append(word2idx[word])
-        ids_label.append(label2idx[inst.label])
-        x_train.append(ids_word)
-        y_train.append(ids_label)
+        # ids_label = []
+        # ids_label.append(label2idx[inst.label])
+        # y_train.append(ids_label)
+        y_train.append(label2idx[inst.label])
+        x_train.append(inst.ori_sentence)
 
     # Encode input words and labels
-    x_valid= [] #[word2idx[word] for word in sentence] for sentence in train_dataset]
-    y_valid = [] #[label2idx[label] for label in labels]
+    x_valid = []  # [word2idx[word] for word in sentence] for sentence in train_dataset]
+    y_valid = []  # [label2idx[label] for label in labels]
     for inst in valid_dataset.insts:
-        ids_word = []
-        ids_label = []
-        for word in inst.words:
-            ids_word.append(word2idx[word])
-        ids_label.append(label2idx[inst.label])
-        x_valid.append(ids_word)
-        y_valid.append(ids_label)
+        # ids_label = []
+        # ids_label.append(label2idx[inst.label])
+        # y_valid.append(ids_label)
+        y_valid.append(label2idx[inst.label])
+        x_valid.append(inst.ori_sentence)
 
     # Apply Padding to X
-    x_train = pad_sequences(x_train, N_SEQ)
-    x_valid = pad_sequences(x_valid, N_SEQ)
+    tokenizer = BertTokenizerFast.from_pretrained(model_name)
 
-    # Convert X to numpy array
-    x_train = np.array(x_train)
-    x_valid = np.array(x_valid)
+    x_train = tokenizer(x_train, truncation=True, padding=True, max_length=N_SEQ, return_tensors="tf")
+    x_valid = tokenizer(x_valid, truncation=True, padding=True, max_length=N_SEQ, return_tensors="tf")
 
     # Convert Y to numpy array
-    y_train = keras.utils.to_categorical(y_train, num_classes=len(label2idx), dtype='float32')
-    y_valid = keras.utils.to_categorical(y_valid, num_classes=len(label2idx), dtype='float32')
+    # y_train = keras.utils.to_categorical(y_train, num_classes=len(label2idx), dtype='float32')
+    # y_valid = keras.utils.to_categorical(y_valid, num_classes=len(label2idx), dtype='float32')
 
-    model, callbacks_list = EmotionClassifierModel(label2idx)
+    train_ds = tf.data.Dataset.from_tensor_slices((
+        dict(x_train),
+        y_train
+    ))
 
+    valid_ds = tf.data.Dataset.from_tensor_slices((
+        dict(x_valid),
+        y_valid
+    ))
+
+    # from IPython import embed
+    # 
+    # embed()
     # Train model
 
-    training_args = TrainingArguments(
-        num_train_epochs=10,
-        per_device_train_batch_size=16,  # batch size per device during training
-        weight_decay=0.01,  # strength of weight decay
-        load_best_model_at_end=True,
-        logging_steps=200,
-        evaluation_strategy="steps"
-    )
+    # model = TFBertForSequenceClassification.from_pretrained(model_name, num_labels=len(label2idx))
+    # training_args = TFTrainingArguments(
+    #     num_train_epochs=1,
+    #     per_device_train_batch_size=BATCH_SIZE,  # batch size per device during training
+    #     per_device_eval_batch_size=BATCH_SIZE,
+    #     weight_decay=0.01,  # strength of weight decay
+    #     load_best_model_at_end=True,
+    #     logging_steps=1,
+    #     evaluation_strategy=IntervalStrategy.STEPS,
+    #     output_dir="models/bert"
+    # )
+    # model = TFTrainer(model=model, args=training_args, train_dataset=train_ds, eval_dataset=valid_ds)
+    # model.train()
 
-    model = Trainer(model=model, args=training_args, train_dataset=train_dataset)
-    model.train()
-
-    model.save("models/bert_v1_trained.h5")
-
-    # model = load_model("models/bert_v1_trained.h5", compile=False)
-
-    end_time = time.time()
-    print("Time taken to train the model", (end_time - start_time))
+    if TRAIN:
+        model, callbacks_list = EmotionClassifierModel(label2idx, filepath)
+        # Train model
+        model.fit(train_ds.batch(BATCH_SIZE), validation_data=valid_ds.batch(BATCH_SIZE), batch_size=BATCH_SIZE,
+                  epochs=1, callbacks=callbacks_list)
+        model.save_pretrained(filepath)
+    model = load_model(filepath, compile=False)
