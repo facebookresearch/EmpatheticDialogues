@@ -103,7 +103,7 @@ def validate(
     all_context = []
     all_cands = []
     n_skipped = 0
-    dtype = model.opt.dataset_name
+    dtype = model.module.opt.dataset_name
     for i, ex in enumerate(data_loader):
         batch_size = ex[0].size(0)
         if dtype == "reddit" and is_test and n_skipped < max_exs:

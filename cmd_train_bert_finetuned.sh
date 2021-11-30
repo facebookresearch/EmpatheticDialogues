@@ -6,6 +6,7 @@ PATH_TO_TRAINED_FASTTEXT_MODEL=dummy
 
 EMO_MODEL=lstm LABEL_SUFFIX=_8 python retrieval_train.py \
 --batch-size 256 \
+--cuda \
 --bert-dim 300 \
 --dataset-name empchat \
 --dict-max-words 250000 \
