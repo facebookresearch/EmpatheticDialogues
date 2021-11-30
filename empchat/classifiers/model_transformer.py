@@ -1,5 +1,5 @@
 from empchat.datasets.tokens import get_bert_token_mapping
-from empchat.classifiers.utils import build_label_idx, bert_predict_and_save_json
+from empchat.classifiers.utils import build_label_idx, bert_predict_and_save_json, create_bert_ds
 from empchat.classifiers.data_loader import EmotionDataset
 
 import numpy as np
@@ -77,67 +77,11 @@ if __name__ == "__main__":
     )
 
     # Encode input words and labels
-    x_train = []  # [word2idx[word] for word in sentence] for sentence in train_dataset]
-    y_train = []  # [label2idx[label] for label in labels]
-    np.random.shuffle(train_dataset.insts)
-    for inst in train_dataset.insts:
-        # ids_label = []
-        # ids_label.append(label2idx[inst.label])
-        # y_train.append(ids_label)
-        y_train.append(label2idx[inst.label])
-        x_train.append(inst.ori_sentence)
+    train_ds = create_bert_ds(train_dataset.insts, N_SEQ, tokenizer, label2idx, True)
+    valid_ds = create_bert_ds(valid_dataset.insts, N_SEQ, tokenizer, label2idx)
+    test_ds = create_bert_ds(test_dataset.insts, N_SEQ, tokenizer, label2idx)
 
-    # Encode input words and labels
-    x_valid = []  # [word2idx[word] for word in sentence] for sentence in train_dataset]
-    y_valid = []  # [label2idx[label] for label in labels]
-    for inst in valid_dataset.insts:
-        # ids_label = []
-        # ids_label.append(label2idx[inst.label])
-        # y_valid.append(ids_label)
-        y_valid.append(label2idx[inst.label])
-        x_valid.append(inst.ori_sentence)
-
-    # Encode input words and labels
-    x_test = []  # [word2idx[word] for word in sentence] for sentence in train_dataset]
-    y_test = []  # [label2idx[label] for label in labels]
-    for inst in test_dataset.insts:
-        # ids_label = []
-        # ids_label.append(label2idx[inst.label])
-        # y_test.append(ids_label)
-        y_test.append(label2idx[inst.label])
-        x_test.append(inst.ori_sentence)
-
-    # Apply Padding to X
-    tokenizer = BertTokenizerFast.from_pretrained(model_name)
-
-    x_train = tokenizer(x_train, truncation=True, padding=True, max_length=N_SEQ, return_tensors="tf")
-    x_valid = tokenizer(x_valid, truncation=True, padding=True, max_length=N_SEQ, return_tensors="tf")
-    x_test = tokenizer(x_test, truncation=True, padding=True, max_length=N_SEQ, return_tensors="tf")
-
-    # Convert Y to numpy array
-    # y_train = keras.utils.to_categorical(y_train, num_classes=len(label2idx), dtype='float32')
-    # y_valid = keras.utils.to_categorical(y_valid, num_classes=len(label2idx), dtype='float32')
-
-    train_ds = tf.data.Dataset.from_tensor_slices((
-        dict(x_train),
-        y_train
-    ))
-
-    valid_ds = tf.data.Dataset.from_tensor_slices((
-        dict(x_valid),
-        y_valid
-    ))
-
-    test_ds = tf.data.Dataset.from_tensor_slices((
-        dict(x_test),
-        y_test
-    ))
-
-    # from IPython import embed
-    # 
-    # embed()
     # Train model
-
     # model = TFBertForSequenceClassification.from_pretrained(model_name, num_labels=len(label2idx))
     # training_args = TFTrainingArguments(
     #     num_train_epochs=1,
@@ -156,7 +100,7 @@ if __name__ == "__main__":
         model, callbacks_list = EmotionClassifierModel(label2idx, filepath)
         # Train model
         model.fit(train_ds.batch(BATCH_SIZE), validation_data=valid_ds.batch(BATCH_SIZE), batch_size=BATCH_SIZE,
-                  epochs=1, callbacks=callbacks_list)
+                  epochs=N_EPOCHS, callbacks=callbacks_list)
         model.save_pretrained(filepath)
 
     model = TFAutoModelForSequenceClassification.from_pretrained(filepath)
@@ -167,5 +111,17 @@ if __name__ == "__main__":
                                "data/trans/train%s.json" % LABEL_SUFFIX, BATCH_SIZE)
     bert_predict_and_save_json(model, valid_dataset.insts, valid_ds, idx2labels,
                                "data/trans/valid%s.json" % LABEL_SUFFIX, BATCH_SIZE)
-    bert_predict_and_save_json(model, test_dataset.insts, test_ds, idx2labels, "data/trans/test%s.json" % LABEL_SUFFIX,
-                               BATCH_SIZE)
+    bert_predict_and_save_json(model, test_dataset.insts, test_ds, idx2labels,
+                               "data/trans/test%s.json" % LABEL_SUFFIX, BATCH_SIZE)
+
+    # history 4 predictions
+    train_ds = create_bert_ds(train_dataset.hist_insts, N_SEQ, tokenizer, label2idx)
+    valid_ds = create_bert_ds(valid_dataset.hist_insts, N_SEQ, tokenizer, label2idx)
+    test_ds = create_bert_ds(test_dataset.hist_insts, N_SEQ, tokenizer, label2idx)
+
+    bert_predict_and_save_json(model, train_dataset.hist_insts, train_ds, idx2labels,
+                               "data/trans/train%s-4.json" % LABEL_SUFFIX, BATCH_SIZE)
+    bert_predict_and_save_json(model, valid_dataset.hist_insts, valid_ds, idx2labels,
+                               "data/trans/valid%s-4.json" % LABEL_SUFFIX, BATCH_SIZE)
+    bert_predict_and_save_json(model, test_dataset.hist_insts, test_ds, idx2labels,
+                               "data/trans/test%s-4.json" % LABEL_SUFFIX, BATCH_SIZE)

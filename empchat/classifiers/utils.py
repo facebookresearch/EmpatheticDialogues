@@ -3,6 +3,7 @@ from .instance import Instance
 
 import numpy as np
 import json
+import tensorflow as tf
 
 from keras.preprocessing.sequence import pad_sequences
 
@@ -146,3 +147,22 @@ def create_x_y_lstm(insts: List[Instance], max_length, word2idx, label2idx, shuf
     from keras.utils import to_categorical
     y = to_categorical(y, num_classes=len(label2idx), dtype='float32')
     return x, y
+
+
+def create_bert_ds(insts: List[Instance], max_length, tokenizer, label2idx, shuffle=False):
+    if shuffle:
+        np.random.shuffle(insts)
+    x = []
+    y = []
+    for inst in insts:
+        # ids_label = []
+        # ids_label.append(label2idx[inst.label])
+        # y.append(ids_label)
+        y.append(label2idx[inst.label])
+        x.append(inst.ori_sentence)
+
+    x = tokenizer(x, truncation=True, padding=True, max_length=max_length, return_tensors="tf")
+
+    ds = tf.data.Dataset.from_tensor_slices((dict(x), y))
+
+    return ds
