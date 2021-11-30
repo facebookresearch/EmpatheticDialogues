@@ -107,6 +107,10 @@ if __name__ == "__main__":
 
     model = TFAutoModelForSequenceClassification.from_pretrained(filepath)
 
+    print("Train: ", model.evaluate(train_ds))
+    print("Valid: ", model.evaluate(valid_ds))
+    print("Test: ", model.evaluate(test_ds))
+
     os.makedirs("data/trans/", exist_ok=True)
 
     bert_predict_and_save_json(model, train_dataset.insts, train_ds, idx2labels,
