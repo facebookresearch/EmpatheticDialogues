@@ -74,7 +74,7 @@ if __name__ == "__main__":
     N_EPOCHS = 100
     SEED = 42
     TRAIN = True
-    LABEL_SUFFIX = "_8"  # or ""
+    LABEL_SUFFIX = os.getenv("LABEL_SUFFIX", "_8")  # or ""
     filepath = "models/lstm_attn%s.h5" % LABEL_SUFFIX
 
     np.random.seed(SEED)
