@@ -76,6 +76,8 @@ if __name__ == "__main__":
         train_dataset.insts
     )
 
+    tokenizer = BertTokenizerFast.from_pretrained(model_name)
+
     # Encode input words and labels
     train_ds = create_bert_ds(train_dataset.insts, N_SEQ, tokenizer, label2idx, True)
     valid_ds = create_bert_ds(valid_dataset.insts, N_SEQ, tokenizer, label2idx)
