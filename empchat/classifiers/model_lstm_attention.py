@@ -130,7 +130,8 @@ if __name__ == "__main__":
 
     # Encode input words and labels
     x_train, y_train = create_x_y_lstm(train_dataset.insts, N_SEQ, word2idx, label2idx, True)
-    x_valid, y_valid = create_x_y_lstm(train_dataset.insts, N_SEQ, word2idx, label2idx, )
+    x_valid, y_valid = create_x_y_lstm(valid_dataset.insts, N_SEQ, word2idx, label2idx)
+    x_test, y_test = create_x_y_lstm(test_dataset.insts, N_SEQ, word2idx, label2idx, )
 
     model, callbacks_list = EmotionClassifierModel(N_EMB, N_SEQ, word2idx, label2idx, embedding_matrix, filepath)
 
@@ -140,6 +141,10 @@ if __name__ == "__main__":
                   epochs=N_EPOCHS, callbacks=callbacks_list)
 
     model = load_model(filepath, compile=False)
+
+    print("Train: ", model.evaluate(x_train, y_train))
+    print("Valid: ", model.evaluate(x_valid, y_valid))
+    print("Test: ", model.evaluate(x_test, y_test))
 
     os.makedirs("data/attn/", exist_ok=True)
 
