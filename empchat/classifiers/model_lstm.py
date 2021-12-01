@@ -132,7 +132,7 @@ if __name__ == "__main__":
         model.fit(x_train, y_train, validation_data=(x_valid, y_valid), batch_size=BATCH_SIZE,
                   epochs=N_EPOCHS, callbacks=callbacks_list)
 
-    model = load_model(filepath, compile=False)
+    model = load_model(filepath)
 
     print("Train: ", model.evaluate(x_train, y_train))
     print("Valid: ", model.evaluate(x_valid, y_valid))
