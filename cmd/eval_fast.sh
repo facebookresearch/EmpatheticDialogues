@@ -1,11 +1,11 @@
 EMPATHETIC_DIALOGUES_DATA_FOLDER=data
-MODEL_NAME=bert_ft_lstm_8
+MODEL_NAME=bert_ft_fast
 EVAL_SAVE_FOLDER=models/${MODEL_NAME}/eval_save
 TRAIN_SAVE_FOLDER=models/${MODEL_NAME}/train_save
 PATH_TO_MODEL_WITH_TRANSFORMER_DICT=${TRAIN_SAVE_FOLDER}/${MODEL_NAME}.mdl
-PATH_TO_TRAINED_FASTTEXT_MODEL=dummy
+PATH_TO_TRAINED_FASTTEXT_MODEL=models/fasttext_empathetic_dialogues.mdl
 
-EMO_MODEL=lstm LABEL_SUFFIX=_8 python retrieval_eval_bleu.py \
+EMO_MODEL=fast python retrieval_eval_bleu.py \
 --bleu-dict ${PATH_TO_MODEL_WITH_TRANSFORMER_DICT} \
 --empchat-cands \
 --empchat-folder ${EMPATHETIC_DIALOGUES_DATA_FOLDER} \
@@ -20,7 +20,7 @@ EMO_MODEL=lstm LABEL_SUFFIX=_8 python retrieval_eval_bleu.py \
 --fasttext-type emo
 
 
-EMO_MODEL=lstm LABEL_SUFFIX=_8 python retrieval_train.py \
+EMO_MODEL=fast python retrieval_train.py \
 --batch-size 256 \
 --bert-dim 300 \
 --cuda \

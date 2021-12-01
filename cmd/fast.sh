@@ -3,7 +3,7 @@ MODEL_NAME=bert_ft_fast
 EVAL_SAVE_FOLDER=models/${MODEL_NAME}/eval_save
 TRAIN_SAVE_FOLDER=models/${MODEL_NAME}/train_save
 PRETRAINED_MODEL_PATH=models/bert_pretrained.mdl
-PATH_TO_TRAINED_FASTTEXT_MODEL=fasttext_empathetic_dialogues.mdl
+PATH_TO_TRAINED_FASTTEXT_MODEL=models/fasttext_empathetic_dialogues.mdl
 
 EMO_MODEL=fast python retrieval_train.py \
 --batch-size 256 \

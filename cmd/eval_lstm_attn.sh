@@ -3,6 +3,7 @@ MODEL_NAME=bert_ft_lstm_attn
 EVAL_SAVE_FOLDER=models/${MODEL_NAME}/eval_save
 TRAIN_SAVE_FOLDER=models/${MODEL_NAME}/train_save
 PATH_TO_MODEL_WITH_TRANSFORMER_DICT=${TRAIN_SAVE_FOLDER}/${MODEL_NAME}.mdl
+PATH_TO_TRAINED_FASTTEXT_MODEL=dummy
 
 EMO_MODEL=attn python retrieval_eval_bleu.py \
 --bleu-dict ${PATH_TO_MODEL_WITH_TRANSFORMER_DICT} \
@@ -13,7 +14,10 @@ EMO_MODEL=attn python retrieval_eval_bleu.py \
 --name ${MODEL_NAME} \
 --output-folder ${EVAL_SAVE_FOLDER}_bleu \
 --reactonly \
---task empchat
+--task empchat \
+--fasttext 1 \
+--fasttext-path ${PATH_TO_TRAINED_FASTTEXT_MODEL} \
+--fasttext-type emo
 
 
 EMO_MODEL=attn python retrieval_train.py \
@@ -31,4 +35,7 @@ EMO_MODEL=attn python retrieval_train.py \
 --model-name ${MODEL_NAME} \
 --optimizer adamax \
 --pretrained ${TRAIN_SAVE_FOLDER}/${MODEL_NAME}.mdl \
---reactonly
+--reactonly \
+--fasttext 1 \
+--fasttext-path ${PATH_TO_TRAINED_FASTTEXT_MODEL} \
+--fasttext-type emo
