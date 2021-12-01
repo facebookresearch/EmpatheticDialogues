@@ -2,7 +2,7 @@ EMPATHETIC_DIALOGUES_DATA_FOLDER=data
 MODEL_NAME=bert_ft_lstm_attn_8
 EVAL_SAVE_FOLDER=models/${MODEL_NAME}/eval_save
 TRAIN_SAVE_FOLDER=models/${MODEL_NAME}/train_save
-PRETRAINED_MODEL_PATH=bert_pretrained.mdl
+PRETRAINED_MODEL_PATH=models/bert_pretrained.mdl
 PATH_TO_TRAINED_FASTTEXT_MODEL=dummy
 
 EMO_MODEL=lstm LABEL_SUFFIX=_8 python retrieval_train.py \
