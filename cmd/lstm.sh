@@ -20,7 +20,7 @@ EMO_MODEL=lstm python retrieval_train.py \
 --model bert \
 --model-dir ${TRAIN_SAVE_FOLDER} \
 --model-name ${MODEL_NAME} \
---num-epochs 100 \
+--num-epochs 15 \
 --optimizer adamax \
 --stop-crit-num-epochs 10 \
 --fasttext 1 \
