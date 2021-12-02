@@ -48,7 +48,7 @@ if __name__ == "__main__":
     N_EPOCHS = 100
     SEED = 42
     TRAIN = True
-    LABEL_SUFFIX = os.getenv("LABEL_SUFFIX", "_8")  # or ""
+    LABEL_SUFFIX = os.getenv("LABEL_SUFFIX", "")  # or ""
     filepath = "models/bert%s.h5" % LABEL_SUFFIX
     # model_name = "bert-base-cased"
     model_name = "distilbert-base-cased"
