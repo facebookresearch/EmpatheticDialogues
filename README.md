@@ -6,12 +6,14 @@ original [readme](./README_OLD.md) has been moved.
 1. [Setup steps](#setup-steps)
 
    1.1 [Environment](#environment)
-   1.2 [Data & Models](#data-models)
+
+   1.2 [Data & Models](#data--models)
 
 2. [Code Structure](#code-structure)
 3. [Running code](#running-code)
 
    3.1 [Training Emotion Classifiers](#training-emotion-classifiers)
+
    3.2 [Training Retrieval w/ BERT](#training-retrieval-w-bert)
 
 4. [Technical Difficulties](#technical-difficulties)
@@ -79,9 +81,11 @@ pip install transformers==4.12.5
 
 ## Code Structure
 
-Apart from the original code, the files that we introduced reside in `empchat/classifiers` folder and `data` folder.
+Apart from the original code, the files that we introduced reside in [empchat/classifiers](./empchat/classifiers) folder
+and [data](./data) folder.
 
-`empchat/classifiers` folder contains the model training and evaluation files for the Emotion classifiers.
+[empchat/classifiers](./empchat/classifiers) folder contains the model training and evaluation files for the Emotion
+classifiers.
 
 <hr/>
 
@@ -89,7 +93,7 @@ Apart from the original code, the files that we introduced reside in `empchat/cl
 
 ### Training Emotion Classifiers
 
-Activate the `empathy02` and then you can train these models.
+Activate the `empathy02` environment, and then you can train these models.
 
 1. BiLSTM model - [model file](./empchat/classifiers/model_lstm.py)
 
@@ -135,6 +139,7 @@ Activate the `empathy02` and then you can train these models.
 
 ### Training Retrieval w/ BERT
 
+Activate the `empathy01` environment, and then you can train these models.
 The training and evaluation scripts reside in `cmd/` directory.
 
 1. BiLSTM model -
