@@ -1,6 +1,10 @@
 We forked the original codebase from [here](https://github.com/facebookresearch/EmpatheticDialogues). The
 original [readme](./README_OLD.md) has been moved.
 
+Download the models trained by us from [here](https://drive.google.com/file/d/1fTF8xa3EC2yPQksAXmspPJOJTt3d6Veg/view)
+
+Demonstration video for the project: [YouTube](https://www.youtube.com/watch?v=5JLwE3JxIaU)
+
 # Table of contents
 
 1. [Setup steps](#setup-steps)
